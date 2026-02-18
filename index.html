@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Beee</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 15% 25%, rgba(255, 255, 255, 0.4) 0%, transparent 10%),
+                radial-gradient(circle at 35% 20%, rgba(255, 255, 255, 0.3) 0%, transparent 12%),
+                radial-gradient(circle at 65% 18%, rgba(255, 255, 255, 0.35) 0%, transparent 15%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        #gameContainer {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        #header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 24px;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        #stats {
+            display: flex;
+            gap: 15px;
+            font-size: 16px;
+            color: #666;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .tile-icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background: #4CAF50;
+            border-radius: 3px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        #gameBoard {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 100%; /* Creates square aspect ratio */
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(255, 235, 59, 0.3) 0%, transparent 15%),
+                radial-gradient(ellipse at 30% 70%, rgba(76, 175, 80, 0.4) 0%, transparent 40%),
+                radial-gradient(ellipse at 70% 75%, rgba(139, 195, 74, 0.4) 0%, transparent 35%),
+                linear-gradient(180deg, 
+                    #87CEEB 0%, 
+                    #A9DBE8 25%, 
+                    #7CB342 50%, 
+                    #689F38 65%, 
+                    #558B2F 80%, 
+                    #33691E 100%);
+            background-size: cover;
+            background-position: center;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.2);
+            touch-action: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        #gameBoardInner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: grid;
+            gap: 0px;
+            padding: 0px;
+        }
+
+        #gameBoard::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(255, 255, 200, 0.3) 0%, transparent 15%),
+                radial-gradient(ellipse at 30% 70%, rgba(76, 175, 80, 0.3) 0%, transparent 40%),
+                radial-gradient(ellipse at 70% 75%, rgba(139, 195, 74, 0.3) 0%, transparent 35%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .tile {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(8px);
+            border-radius: 0px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            border: none;
+            z-index: 2;
+            touch-action: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .tile:hover {
+            background: rgba(255, 255, 255, 0.75);
+            transform: scale(0.98);
+        }
+
+        .tile.filled {
+            background: transparent;
+            cursor: default;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .tile.filled:hover {
+            background: transparent;
+            transform: none;
+        }
+
+        .bee {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            pointer-events: none;
+            z-index: 10;
+            transform-origin: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
+        /* Left wing */
+        .bee::before {
+            content: '';
+            position: absolute;
+            width: 14px;
+            height: 18px;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.9) 0%, 
+                rgba(230, 240, 255, 0.7) 50%,
+                rgba(200, 220, 255, 0.5) 100%);
+            border-radius: 50% 50% 30% 70%;
+            top: 5px;
+            left: 0px;
+            animation: wingBeatLeft 0.08s linear infinite;
+            transform-origin: bottom center;
+            border: 0.5px solid rgba(180, 200, 230, 0.6);
+            box-shadow: 0 0 3px rgba(255, 255, 255, 0.5);
+        }
+
+        /* Right wing */
+        .bee::after {
+            content: '';
+            position: absolute;
+            width: 14px;
+            height: 18px;
+            background: linear-gradient(225deg, 
+                rgba(255, 255, 255, 0.9) 0%, 
+                rgba(230, 240, 255, 0.7) 50%,
+                rgba(200, 220, 255, 0.5) 100%);
+            border-radius: 50% 50% 70% 30%;
+            top: 5px;
+            right: 0px;
+            animation: wingBeatRight 0.08s linear infinite;
+            transform-origin: bottom center;
+            border: 0.5px solid rgba(180, 200, 230, 0.6);
+            box-shadow: 0 0 3px rgba(255, 255, 255, 0.5);
+        }
+
+        @keyframes wingBeatLeft {
+            0% {
+                transform: translateY(0) rotateZ(-10deg);
+                opacity: 0.9;
+            }
+            25% {
+                transform: translateY(-4px) rotateZ(-35deg);
+                opacity: 0.7;
+            }
+            50% {
+                transform: translateY(-6px) rotateZ(-45deg);
+                opacity: 0.5;
+            }
+            75% {
+                transform: translateY(-4px) rotateZ(-35deg);
+                opacity: 0.7;
+            }
+            100% {
+                transform: translateY(0) rotateZ(-10deg);
+                opacity: 0.9;
+            }
+        }
+
+        @keyframes wingBeatRight {
+            0% {
+                transform: translateY(0) rotateZ(10deg);
+                opacity: 0.9;
+            }
+            25% {
+                transform: translateY(-4px) rotateZ(35deg);
+                opacity: 0.7;
+            }
+            50% {
+                transform: translateY(-6px) rotateZ(45deg);
+                opacity: 0.5;
+            }
+            75% {
+                transform: translateY(-4px) rotateZ(35deg);
+                opacity: 0.7;
+            }
+            100% {
+                transform: translateY(0) rotateZ(10deg);
+                opacity: 0.9;
+            }
+        }
+
+        #controls {
+            display: flex; /* Visible at start and game over */
+            gap: 10px;
+            flex-wrap: wrap;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+            justify-content: center;
+        }
+
+        #controls.hide {
+            display: none; /* Hidden during active gameplay */
+        }
+
+        button {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        #restartBtn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-width: 200px;
+            padding: 20px 50px;
+            font-size: 24px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        #restartBtn:hover {
+            background: linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.5);
+        }
+
+        #difficultyBtn {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        #difficultyBtn:hover {
+            background: #e0e0e0;
+            transform: translateY(-2px);
+        }
+
+        #message {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            min-height: 30px;
+        }
+
+        .win {
+            color: #4CAF50;
+            animation: celebrate 0.5s ease;
+        }
+
+        .lose {
+            color: #f44336;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes celebrate {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .bee-dead {
+            animation: fall 0.5s ease forwards;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(500px) rotate(180deg);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 400px) {
+            h1 {
+                font-size: 20px;
+            }
+            #stats {
+                font-size: 14px;
+            }
+            button {
+                font-size: 14px;
+                padding: 10px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="header">
+            <h1>🐝 The Beee</h1>
+            <div id="stats">
+                <div class="stat">
+                    <span>❤️</span>
+                    <span id="lives">3</span>
+                </div>
+                <div class="stat">
+                    <span class="tile-icon"></span>
+                    <span id="tilesLeft">0</span>
+                </div>
+                <div class="stat">
+                    <span>🎮</span>
+                    <span id="level">Level 1</span>
+                </div>
+                <div class="stat" style="display: none;">
+                    <span>🎯</span>
+                    <span id="difficulty">Easy</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="gameBoard">
+        </div>
+
+        <div id="controls">
+            <button id="restartBtn">Start</button>
+            <button id="difficultyBtn" style="display: none;">Change Difficulty</button>
+        </div>
+
+        <div id="message"></div>
+    </div>
+
+    <script>
+        const DIFFICULTIES = {
+            'Easy': { grid: 4, speed: 1.5 },
+            'Medium': { grid: 5, speed: 2.5 },
+            'Hard': { grid: 6, speed: 3.5 }
+        };
+
+        let currentDifficulty = 'Easy';
+        let currentLevel = 1;
+        let playerLives = 3;
+        let gridSize = DIFFICULTIES[currentDifficulty].grid;
+        let moveSpeed = DIFFICULTIES[currentDifficulty].speed;
+        let tiles = [];
+        let filledTiles = new Set();
+        let bees = []; // Array to hold multiple bees
+        let gameOver = false;
+        let animationFrame;
+
+        const gameBoard = document.getElementById('gameBoard');
+        const tilesLeftEl = document.getElementById('tilesLeft');
+        const levelEl = document.getElementById('level');
+        const livesEl = document.getElementById('lives');
+        const difficultyEl = document.getElementById('difficulty');
+        const messageEl = document.getElementById('message');
+        const controlsEl = document.getElementById('controls');
+        const restartBtn = document.getElementById('restartBtn');
+        const difficultyBtn = document.getElementById('difficultyBtn');
+
+        function initGame(nextLevel = false) {
+            if (nextLevel) {
+                currentLevel++;
+            } else {
+                currentLevel = 1;
+                playerLives = 3; // Reset lives when starting new game
+            }
+            
+            // Hide controls during gameplay
+            controlsEl.classList.add('hide');
+            
+            // Calculate level parameters
+            const baseGrid = DIFFICULTIES[currentDifficulty].grid;
+            const baseSpeed = DIFFICULTIES[currentDifficulty].speed;
+            
+            // Increase grid size every 3 levels
+            gridSize = baseGrid + Math.floor((currentLevel - 1) / 3);
+            
+            // Increase speed by 15% per level
+            moveSpeed = baseSpeed * (1 + (currentLevel - 1) * 0.15);
+            
+            // Add second bee at level 5, third at level 10, etc.
+            const numBees = Math.floor((currentLevel - 1) / 5) + 1;
+            
+            gameOver = false;
+            filledTiles.clear();
+            tiles = [];
+            bees = [];
+            messageEl.textContent = '';
+            messageEl.className = '';
+            
+            // Clear board
+            gameBoard.innerHTML = '';
+            
+            // Create inner container for grid
+            const inner = document.createElement('div');
+            inner.id = 'gameBoardInner';
+            gameBoard.appendChild(inner);
+            
+            // Set grid
+            inner.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+            inner.style.gridTemplateRows = `repeat(${gridSize}, 1fr)`;
+            
+            // Create tiles
+            for (let i = 0; i < gridSize * gridSize; i++) {
+                const tile = document.createElement('div');
+                tile.className = 'tile';
+                tile.dataset.index = i;
+                tile.addEventListener('click', handleTileClick);
+                tile.addEventListener('touchstart', handleTileClick);
+                tile.addEventListener('mouseenter', handleTileEnter);
+                tile.addEventListener('mousedown', handleMouseDown);
+                inner.appendChild(tile);
+                tiles.push(tile);
+            }
+            
+            // Create bees
+            setTimeout(() => {
+                const boardSize = gameBoard.offsetWidth;
+                for (let i = 0; i < numBees; i++) {
+                    const bee = document.createElement('div');
+                    bee.className = 'bee';
+                    bee.textContent = '🐝';
+                    gameBoard.appendChild(bee);
+                    
+                    // Random starting position
+                    const beeData = {
+                        element: bee,
+                        position: {
+                            x: Math.random() * (boardSize - 40),
+                            y: Math.random() * (boardSize - 40)
+                        },
+                        velocity: { x: 0, y: 0 },
+                        rotation: 0,
+                        targetRotation: 0
+                    };
+                    
+                    // Random initial velocity
+                    const angle = Math.random() * Math.PI * 2;
+                    beeData.velocity = {
+                        x: Math.cos(angle) * moveSpeed,
+                        y: Math.sin(angle) * moveSpeed
+                    };
+                    
+                    // Set initial rotation
+                    beeData.rotation = angle * (180 / Math.PI);
+                    beeData.targetRotation = beeData.rotation;
+                    
+                    bees.push(beeData);
+                    updateBeePosition(beeData);
+                }
+                
+                startBeeAnimation();
+                
+                // Start background music
+                playBackgroundMusic();
+            }, 50);
+            
+            updateStats();
+        }
+
+        function updateStats() {
+            const tilesLeft = gridSize * gridSize - filledTiles.size - bees.length;
+            tilesLeftEl.textContent = `${tilesLeft} left`;
+            levelEl.textContent = `Level ${currentLevel}`;
+            livesEl.textContent = playerLives;
+            difficultyEl.textContent = currentDifficulty;
+        }
+
+        function retryLevel() {
+            // Retry the same level without changing level number or lives
+            gameOver = false;
+            filledTiles.clear();
+            tiles = [];
+            bees = [];
+            messageEl.textContent = '';
+            messageEl.className = '';
+            
+            // Hide controls during gameplay
+            controlsEl.classList.add('hide');
+            
+            // Clear board
+            gameBoard.innerHTML = '';
+            
+            // Create inner container for grid
+            const inner = document.createElement('div');
+            inner.id = 'gameBoardInner';
+            gameBoard.appendChild(inner);
+            
+            // Set grid
+            inner.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+            inner.style.gridTemplateRows = `repeat(${gridSize}, 1fr)`;
+            
+            // Create tiles
+            for (let i = 0; i < gridSize * gridSize; i++) {
+                const tile = document.createElement('div');
+                tile.className = 'tile';
+                tile.dataset.index = i;
+                tile.addEventListener('click', handleTileClick);
+                tile.addEventListener('touchstart', handleTileClick);
+                tile.addEventListener('mouseenter', handleTileEnter);
+                tile.addEventListener('mousedown', handleMouseDown);
+                inner.appendChild(tile);
+                tiles.push(tile);
+            }
+            
+            // Create bees
+            setTimeout(() => {
+                const boardSize = gameBoard.offsetWidth;
+                const numBees = Math.floor((currentLevel - 1) / 5) + 1;
+                
+                for (let i = 0; i < numBees; i++) {
+                    const bee = document.createElement('div');
+                    bee.className = 'bee';
+                    bee.textContent = '🐝';
+                    gameBoard.appendChild(bee);
+                    
+                    const beeData = {
+                        element: bee,
+                        position: {
+                            x: Math.random() * (boardSize - 40),
+                            y: Math.random() * (boardSize - 40)
+                        },
+                        velocity: { x: 0, y: 0 },
+                        rotation: 0,
+                        targetRotation: 0
+                    };
+                    
+                    const angle = Math.random() * Math.PI * 2;
+                    beeData.velocity = {
+                        x: Math.cos(angle) * moveSpeed,
+                        y: Math.sin(angle) * moveSpeed
+                    };
+                    
+                    beeData.rotation = angle * (180 / Math.PI);
+                    beeData.targetRotation = beeData.rotation;
+                    
+                    bees.push(beeData);
+                    updateBeePosition(beeData);
+                }
+                
+                startBeeAnimation();
+                // Don't play music yet - wait for actual retry after death animation
+            }, 50);
+            
+            updateStats();
+        }
+
+        let isTouching = false;
+
+        // Create audio context for sound effects
+        let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        let musicNodes = null;
+        let musicPlaying = false;
+        let currentMusicStyle = 'piano';
+        let currentMusicTimeout = null;
+        let activeOscillators = []; // Track all active oscillators to stop them
+
+        // Fun, fantastical bee adventure melody
+        const bumblebeeNotes = [
+            // Bouncy, whimsical opening phrase
+            { note: 'C5', time: 0 }, { note: 'E5', time: 0.2 }, { note: 'G5', time: 0.4 }, { note: 'C6', time: 0.6 },
+            { note: 'B5', time: 0.8 }, { note: 'G5', time: 1.0 }, { note: 'E5', time: 1.2 }, { note: 'C5', time: 1.4 },
+            
+            // Magical ascending run
+            { note: 'D5', time: 1.6 }, { note: 'F5', time: 1.8 }, { note: 'A5', time: 2.0 }, { note: 'D6', time: 2.2 },
+            { note: 'C6', time: 2.4 }, { note: 'A5', time: 2.6 }, { note: 'F5', time: 2.8 }, { note: 'D5', time: 3.0 },
+            
+            // Playful jumping pattern
+            { note: 'E5', time: 3.2 }, { note: 'C5', time: 3.4 }, { note: 'G5', time: 3.6 }, { note: 'E5', time: 3.8 },
+            { note: 'A5', time: 4.0 }, { note: 'F5', time: 4.2 }, { note: 'D5', time: 4.4 }, { note: 'B4', time: 4.6 },
+            
+            // Happy resolution with flourish
+            { note: 'C5', time: 4.8 }, { note: 'E5', time: 5.0 }, { note: 'G5', time: 5.2 }, { note: 'E5', time: 5.4 },
+            { note: 'C5', time: 5.6 }, { note: 'G4', time: 5.8 }, { note: 'C5', time: 6.0 }, { note: 'E5', time: 6.2 },
+            
+            // Sparkly ending trill
+            { note: 'G5', time: 6.4 }, { note: 'F5', time: 6.5 }, { note: 'G5', time: 6.6 }, { note: 'A5', time: 6.7 },
+            { note: 'G5', time: 6.8 }, { note: 'F5', time: 6.9 }, { note: 'E5', time: 7.0 }, { note: 'D5', time: 7.1 },
+            { note: 'C5', time: 7.2 }
+        ];
+
+        const noteFrequencies = {
+            'G4': 392.00, 'A4': 440.00, 'B4': 493.88,
+            'C5': 523.25, 'D5': 587.33, 'E5': 659.25, 'F5': 698.46, 'G5': 783.99, 'A5': 880.00,
+            'B5': 987.77, 'C6': 1046.50, 'D6': 1174.66
+        };
+
+        function playBackgroundMusic() {
+            // Stop any existing music first
+            stopBackgroundMusic();
+            
+            // Small delay to ensure previous music is stopped
+            setTimeout(() => {
+                musicPlaying = true;
+                
+                // Randomly select a style from expanded options
+                const styles = ['piano', '8bit', 'techno', 'opera', 'robotic', 'traditional', 'futuristic', 'metal', 'guitar', 'xylophone', 'none'];
+                currentMusicStyle = styles[Math.floor(Math.random() * styles.length)];
+            
+            console.log('Playing Bee Adventure Theme in', currentMusicStyle, 'style');
+            
+            try {
+                function playMelodyLoop(startTime) {
+                    if (!musicPlaying) return;
+                    
+                    const loopTime = startTime;
+                    const noteDuration = 0.18; // Bouncy, playful timing
+                    
+                    bumblebeeNotes.forEach((noteData, index) => {
+                        const freq = noteFrequencies[noteData.note];
+                        if (!freq) return;
+                        
+                        const osc = audioContext.createOscillator();
+                        const gain = audioContext.createGain();
+                        
+                        // Style-specific settings
+                        switch(currentMusicStyle) {
+                            case 'piano':
+                                osc.type = 'triangle';
+                                gain.gain.setValueAtTime(0.15, loopTime + noteData.time);
+                                gain.gain.exponentialRampToValueAtTime(0.01, loopTime + noteData.time + noteDuration);
+                                break;
+                            
+                            case '8bit':
+                                osc.type = 'square';
+                                gain.gain.setValueAtTime(0.12, loopTime + noteData.time);
+                                gain.gain.exponentialRampToValueAtTime(0.01, loopTime + noteData.time + noteDuration);
+                                break;
+                            
+                            case 'techno':
+                                osc.type = 'sawtooth';
+                                // Add vibrato for techno effect
+                                const lfo = audioContext.createOscillator();
+                                const lfoGain = audioContext.createGain();
+                                lfo.frequency.value = 6;
+                                lfoGain.gain.value = 10;
+                                lfo.connect(lfoGain);
+                                lfoGain.connect(osc.frequency);
+                                lfo.start(loopTime + noteData.time);
+                                lfo.stop(loopTime + noteData.time + noteDuration);
+                                
+                                gain.gain.setValueAtTime(0.13, loopTime + noteData.time);
+                                gain.gain.setValueAtTime(0.13, loopTime + noteData.time + noteDuration * 0.8);
+                                gain.gain.exponentialRampToValueAtTime(0.01, loopTime + noteData.time + noteDuration);
+                                break;
+                            
+                            case 'opera':
+                                osc.type = 'sine';
+                                // Smooth, vocal-like envelope
+                                gain.gain.setValueAtTime(0.1, loopTime + noteData.time);
+                                gain.gain.linearRampToValueAtTime(0.14, loopTime + noteData.time + noteDuration * 0.3);
+                                gain.gain.linearRampToValueAtTime(0.12, loopTime + noteData.time + noteDuration * 0.7);
+                                gain.gain.exponentialRampToValueAtTime(0.01, loopTime + noteData.time + noteDuration);
+                                break;
+                            
+                            case 'robotic':
+                                osc.type = 'square';
+                                // Harsh, mechanical sound with pitch bend
+                                osc.frequency.setValueAtTime(freq * 0.99, loopTime + noteData.time);
+                                osc.frequency.linearRampToValueAtTime(freq * 1.01, loopTime + noteData.time + noteDuration);
+                                
+                                gain.gain.setValueAtTime(0.14, loopTime + noteData.time);
+                                gain.gain.setValueAtTime(0.14, loopTime + noteData.time + noteDuration * 0.9);
+                                gain.gain.exponentialRampToValueAtTime(0.01, loopTime + noteData.time + noteDuration);
+                                break;
+                            
+                            case 'traditional':
+                                osc.type = 'sine';
+                                // Pure classical tone with gentle decay
+                                gain.gain.setValueAtTime(0.13, loopTime + noteData.time);
+                                gain.gain.exponentialRampToValueAtTime(0.01, loopTime + noteData.time + noteDuration * 1.5);
+                                break;
+                            
+                            case 'futuristic':
+                                osc.type = 'sawtooth';
+                                // Sci-fi effect with frequency sweeps
+                                const lfo2 = audioContext.createOscillator();
+                                const lfoGain2 = audioContext.createGain();
+                                lfo2.frequency.value = 12;
+                                lfoGain2.gain.value = 20;
+                                lfo2.connect(lfoGain2);
+                                lfoGain2.connect(osc.frequency);
+                                lfo2.start(loopTime + noteData.time);
+                                lfo2.stop(loopTime + noteData.time + noteDuration);
+                                
+                                gain.gain.setValueAtTime(0.11, loopTime + noteData.time);
+                                gain.gain.exponentialRampToValueAtTime(0.01, loopTime + noteData.time + noteDuration);
+                                break;
+                            
+                            case 'metal':
+                                osc.type = 'sawtooth';
+                                // Heavy distorted sound
+                                const osc2 = audioContext.createOscillator();
+                                osc2.type = 'square';
+                                osc2.frequency.setValueAtTime(freq * 0.5, loopTime + noteData.time); // Octave down
+                                osc2.connect(gain);
+                                osc2.start(loopTime + noteData.time);
+                                osc2.stop(loopTime + noteData.time + noteDuration);
+                                
+                                gain.gain.setValueAtTime(0.16, loopTime + noteData.time);
+                                gain.gain.exponentialRampToValueAtTime(0.01, loopTime + noteData.time + noteDuration);
+                                break;
+                            
+                            case 'guitar':
+                                osc.type = 'sawtooth';
+                                // Plucked string effect with harmonics
+                                const harmonic = audioContext.createOscillator();
+                                const harmonicGain = audioContext.createGain();
+                                harmonic.type = 'sine';
+                                harmonic.frequency.setValueAtTime(freq * 2, loopTime + noteData.time);
+                                harmonicGain.gain.setValueAtTime(0.05, loopTime + noteData.time);
+                                harmonicGain.gain.exponentialRampToValueAtTime(0.01, loopTime + noteData.time + noteDuration * 0.5);
+                                harmonic.connect(harmonicGain);
+                                harmonicGain.connect(audioContext.destination);
+                                harmonic.start(loopTime + noteData.time);
+                                harmonic.stop(loopTime + noteData.time + noteDuration);
+                                
+                                gain.gain.setValueAtTime(0.14, loopTime + noteData.time);
+                                gain.gain.exponentialRampToValueAtTime(0.01, loopTime + noteData.time + noteDuration * 0.8);
+                                break;
+                            
+                            case 'xylophone':
+                                osc.type = 'sine';
+                                // Bright, percussive xylophone with harmonics
+                                const xyloHarmonic1 = audioContext.createOscillator();
+                                const xyloHarmonic2 = audioContext.createOscillator();
+                                const xyloGain1 = audioContext.createGain();
+                                const xyloGain2 = audioContext.createGain();
+                                
+                                xyloHarmonic1.type = 'sine';
+                                xyloHarmonic2.type = 'sine';
+                                xyloHarmonic1.frequency.setValueAtTime(freq * 3, loopTime + noteData.time);
+                                xyloHarmonic2.frequency.setValueAtTime(freq * 5, loopTime + noteData.time);
+                                
+                                xyloGain1.gain.setValueAtTime(0.08, loopTime + noteData.time);
+                                xyloGain1.gain.exponentialRampToValueAtTime(0.01, loopTime + noteData.time + noteDuration * 0.5);
+                                xyloGain2.gain.setValueAtTime(0.05, loopTime + noteData.time);
+                                xyloGain2.gain.exponentialRampToValueAtTime(0.01, loopTime + noteData.time + noteDuration * 0.4);
+                                
+                                xyloHarmonic1.connect(xyloGain1);
+                                xyloGain1.connect(audioContext.destination);
+                                xyloHarmonic2.connect(xyloGain2);
+                                xyloGain2.connect(audioContext.destination);
+                                
+                                xyloHarmonic1.start(loopTime + noteData.time);
+                                xyloHarmonic1.stop(loopTime + noteData.time + noteDuration);
+                                xyloHarmonic2.start(loopTime + noteData.time);
+                                xyloHarmonic2.stop(loopTime + noteData.time + noteDuration);
+                                
+                                gain.gain.setValueAtTime(0.12, loopTime + noteData.time);
+                                gain.gain.exponentialRampToValueAtTime(0.01, loopTime + noteData.time + noteDuration * 0.6);
+                                break;
+                            
+                            case 'none':
+                                osc.type = 'sine';
+                                // Plain sine wave, no effects
+                                gain.gain.setValueAtTime(0.12, loopTime + noteData.time);
+                                gain.gain.exponentialRampToValueAtTime(0.01, loopTime + noteData.time + noteDuration);
+                                break;
+                        }
+                        
+                        osc.frequency.setValueAtTime(freq, loopTime + noteData.time);
+                        osc.connect(gain);
+                        gain.connect(audioContext.destination);
+                        
+                        // Track oscillator so we can force stop it
+                        activeOscillators.push(osc);
+                        
+                        osc.start(loopTime + noteData.time);
+                        osc.stop(loopTime + noteData.time + noteDuration);
+                    });
+                    
+                    // Add bass line for techno and metal styles
+                    if (currentMusicStyle === 'techno' || currentMusicStyle === 'metal') {
+                        const bassTimes = [0, 0.8, 1.6, 2.4, 3.2, 4.0, 4.8, 5.6, 6.4, 7.2];
+                        bassTimes.forEach(time => {
+                            const osc = audioContext.createOscillator();
+                            const gain = audioContext.createGain();
+                            
+                            osc.type = 'sine';
+                            // Alternate between C and G for fun bouncy bass
+                            const bassFreq = (time % 1.6 === 0) ? 130.81 : 196.00; // C3 or G3
+                            osc.frequency.setValueAtTime(bassFreq, loopTime + time);
+                            
+                            const volume = currentMusicStyle === 'metal' ? 0.25 : 0.2;
+                            gain.gain.setValueAtTime(volume, loopTime + time);
+                            gain.gain.exponentialRampToValueAtTime(0.01, loopTime + time + 0.6);
+                            
+                            osc.connect(gain);
+                            gain.connect(audioContext.destination);
+                            
+                            // Track oscillator so we can force stop it
+                            activeOscillators.push(osc);
+                            
+                            osc.start(loopTime + time);
+                            osc.stop(loopTime + time + 0.6);
+                        });
+                    }
+                    
+                    // Schedule next loop
+                    if (musicPlaying) {
+                        currentMusicTimeout = setTimeout(() => {
+                            playMelodyLoop(audioContext.currentTime);
+                        }, 7300); // Loop every 7.3 seconds
+                    }
+                }
+                
+                playMelodyLoop(audioContext.currentTime);
+                
+            } catch (e) {
+                console.log('Music not available');
+            }
+            }, 100); // 100ms delay to ensure clean start
+        }
+
+
+        function stopBackgroundMusic() {
+            musicPlaying = false;
+            
+            // Clear any scheduled loop
+            if (currentMusicTimeout) {
+                clearTimeout(currentMusicTimeout);
+                currentMusicTimeout = null;
+            }
+        }
+        
+        function forceStopAllAudio() {
+            // Most aggressive stop: close and recreate entire audio context
+            musicPlaying = false;
+            
+            // Clear any scheduled loop
+            if (currentMusicTimeout) {
+                clearTimeout(currentMusicTimeout);
+                currentMusicTimeout = null;
+            }
+            
+            // Stop all active oscillators
+            activeOscillators.forEach(osc => {
+                try {
+                    osc.stop();
+                } catch (e) {
+                    // Already stopped
+                }
+            });
+            activeOscillators = [];
+            
+            // Close the audio context completely to kill ALL sounds
+            try {
+                audioContext.close();
+                // Create a brand new audio context
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.log('Could not recreate audio context');
+            }
+        }
+
+        function playClickSound() {
+            try {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                // Soft, pleasant click sound
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.05);
+                
+                // Volume envelope for soft, gentle sound
+                gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.1);
+            } catch (e) {
+                // Silent fail if audio doesn't work
+                console.log('Audio not available');
+            }
+        }
+
+        function playBeeDeathSound() {
+            try {
+                const now = audioContext.currentTime;
+                
+                // Create a dramatic, sad descending sound
+                const oscillator1 = audioContext.createOscillator();
+                const oscillator2 = audioContext.createOscillator();
+                const oscillator3 = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                // Horrifying dissonant chord that descends
+                oscillator1.type = 'sawtooth';
+                oscillator2.type = 'square';
+                oscillator3.type = 'sine';
+                
+                // Start with a harsh high frequency
+                oscillator1.frequency.setValueAtTime(880, now);
+                oscillator2.frequency.setValueAtTime(660, now);
+                oscillator3.frequency.setValueAtTime(440, now);
+                
+                // Dramatic descent into darkness
+                oscillator1.frequency.exponentialRampToValueAtTime(110, now + 0.8);
+                oscillator2.frequency.exponentialRampToValueAtTime(82, now + 0.8);
+                oscillator3.frequency.exponentialRampToValueAtTime(55, now + 0.8);
+                
+                // Volume envelope - loud shock then fade
+                gainNode.gain.setValueAtTime(0.4, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.2, now + 0.3);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
+                
+                oscillator1.connect(gainNode);
+                oscillator2.connect(gainNode);
+                oscillator3.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator1.start(now);
+                oscillator2.start(now);
+                oscillator3.start(now);
+                oscillator1.stop(now + 0.8);
+                oscillator2.stop(now + 0.8);
+                oscillator3.stop(now + 0.8);
+            } catch (e) {
+                console.log('Audio not available');
+            }
+        }
+
+        function playWinSound() {
+            try {
+                const now = audioContext.currentTime;
+                
+                // Victory fanfare - ascending triumphant melody
+                const notes = [
+                    { freq: 523.25, time: 0, duration: 0.15 },      // C5
+                    { freq: 659.25, time: 0.15, duration: 0.15 },   // E5
+                    { freq: 783.99, time: 0.3, duration: 0.15 },    // G5
+                    { freq: 1046.50, time: 0.45, duration: 0.4 }    // C6 (hold)
+                ];
+                
+                notes.forEach(note => {
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(note.freq, now + note.time);
+                    
+                    // Triumphant envelope
+                    gain.gain.setValueAtTime(0.25, now + note.time);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + note.time + note.duration);
+                    
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+                    
+                    osc.start(now + note.time);
+                    osc.stop(now + note.time + note.duration);
+                });
+                
+                // Add sparkly harmonics for magical effect
+                const sparkles = [
+                    { freq: 2093, time: 0.5, duration: 0.3 },   // C7
+                    { freq: 2349, time: 0.55, duration: 0.25 }, // D7
+                    { freq: 2637, time: 0.6, duration: 0.2 }    // E7
+                ];
+                
+                sparkles.forEach(sparkle => {
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(sparkle.freq, now + sparkle.time);
+                    
+                    gain.gain.setValueAtTime(0.15, now + sparkle.time);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + sparkle.time + sparkle.duration);
+                    
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+                    
+                    osc.start(now + sparkle.time);
+                    osc.stop(now + sparkle.time + sparkle.duration);
+                });
+            } catch (e) {
+                console.log('Audio not available');
+            }
+        }
+
+        function checkLevelComplete() {
+            // Check if level is complete - no more tiles can be safely filled
+            // Level is complete when all empty tiles currently have bees on them
+            
+            // Safety check - make sure bees exist
+            if (!bees || bees.length === 0) return false;
+            
+            const tileSize = gameBoard.offsetWidth / gridSize;
+            
+            // Safety check for valid board size
+            if (!tileSize || tileSize === 0) return false;
+            
+            // Get set of tiles that currently have bees
+            const beeTiles = new Set();
+            for (let beeData of bees) {
+                if (!beeData || !beeData.position) continue;
+                
+                const beeRow = Math.floor((beeData.position.y + 20) / tileSize);
+                const beeCol = Math.floor((beeData.position.x + 20) / tileSize);
+                if (beeRow >= 0 && beeRow < gridSize && beeCol >= 0 && beeCol < gridSize) {
+                    const beeTileIndex = beeRow * gridSize + beeCol;
+                    beeTiles.add(beeTileIndex);
+                }
+            }
+            
+            // Count how many empty tiles don't have bees
+            let safeTilesToFill = 0;
+            for (let i = 0; i < gridSize * gridSize; i++) {
+                if (!filledTiles.has(i) && !beeTiles.has(i)) {
+                    safeTilesToFill++;
+                }
+            }
+            
+            // If there are no safe tiles to fill and we've filled at least one tile, level is complete
+            if (safeTilesToFill === 0 && filledTiles.size > 0) {
+                endGame(true);
+                return true;
+            }
+            
+            return false;
+        }
+
+        function handleTileClick(e) {
+            if (gameOver) return;
+            
+            // Prevent default behavior for touch events
+            if (e.type === 'touchstart') {
+                e.preventDefault();
+                isTouching = true;
+            }
+            
+            const index = parseInt(e.target.dataset.index);
+            
+            // Check if any bee is on this tile with precise collision
+            const tileSize = gameBoard.offsetWidth / gridSize;
+            const tileRow = Math.floor(index / gridSize);
+            const tileCol = index % gridSize;
+            
+            // Get tile boundaries
+            const tileLeft = tileCol * tileSize;
+            const tileRight = (tileCol + 1) * tileSize;
+            const tileTop = tileRow * tileSize;
+            const tileBottom = (tileRow + 1) * tileSize;
+            
+            for (let beeData of bees) {
+                // Bee collision box (center of the bee emoji, accounting for actual bee size)
+                const beeLeft = beeData.position.x + 10; // 10px margin from left
+                const beeRight = beeData.position.x + 30; // 30px from left (20px bee width)
+                const beeTop = beeData.position.y + 10; // 10px margin from top
+                const beeBottom = beeData.position.y + 30; // 30px from top (20px bee height)
+                
+                // Check if bee overlaps with tile
+                const overlaps = !(beeRight < tileLeft || 
+                                   beeLeft > tileRight || 
+                                   beeBottom < tileTop || 
+                                   beeTop > tileBottom);
+                
+                if (overlaps) {
+                    // Game over - bee died
+                    playBeeDeathSound(); // Play horrifying death sound
+                    endGame(false);
+                    return;
+                }
+            }
+            
+            // Fill tile
+            if (!filledTiles.has(index)) {
+                filledTiles.add(index);
+                e.target.classList.add('filled');
+                playClickSound(); // Play satisfying click sound
+                updateStats();
+                
+                // Check if level is complete
+                checkLevelComplete();
+            }
+        }
+
+        function handleTileEnter(e) {
+            if (gameOver) return;
+            
+            // For touch events, find which tile is under the touch
+            let targetTile = e.target;
+            if (e.type === 'touchmove') {
+                e.preventDefault();
+                e.stopPropagation();
+                if (!isTouching) return;
+                
+                const touch = e.touches[0];
+                if (!touch) return;
+                
+                targetTile = document.elementFromPoint(touch.clientX, touch.clientY);
+                if (!targetTile || !targetTile.classList.contains('tile')) return;
+            } else if (e.type === 'mouseenter') {
+                if (!isTouching) return;
+            }
+            
+            const index = parseInt(targetTile.dataset.index);
+            if (isNaN(index)) return;
+            
+            // Check if any bee is on this tile with precise collision
+            const tileSize = gameBoard.offsetWidth / gridSize;
+            const tileRow = Math.floor(index / gridSize);
+            const tileCol = index % gridSize;
+            
+            // Get tile boundaries
+            const tileLeft = tileCol * tileSize;
+            const tileRight = (tileCol + 1) * tileSize;
+            const tileTop = tileRow * tileSize;
+            const tileBottom = (tileRow + 1) * tileSize;
+            
+            for (let beeData of bees) {
+                // Bee collision box (center of the bee emoji, accounting for actual bee size)
+                const beeLeft = beeData.position.x + 10; // 10px margin from left
+                const beeRight = beeData.position.x + 30; // 30px from left (20px bee width)
+                const beeTop = beeData.position.y + 10; // 10px margin from top
+                const beeBottom = beeData.position.y + 30; // 30px from top (20px bee height)
+                
+                // Check if bee overlaps with tile
+                const overlaps = !(beeRight < tileLeft || 
+                                   beeLeft > tileRight || 
+                                   beeBottom < tileTop || 
+                                   beeTop > tileBottom);
+                
+                if (overlaps) {
+                    // Game over - bee died
+                    playBeeDeathSound(); // Play horrifying death sound
+                    endGame(false);
+                    return;
+                }
+            }
+            
+            // Fill tile
+            if (!filledTiles.has(index)) {
+                filledTiles.add(index);
+                targetTile.classList.add('filled');
+                playClickSound(); // Play satisfying click sound
+                updateStats();
+                
+                // Check if level is complete
+                checkLevelComplete();
+            }
+        }
+
+        function handleTouchEnd(e) {
+            isTouching = false;
+        }
+
+        function handleMouseDown(e) {
+            if (gameOver) return;
+            isTouching = true;
+        }
+
+        function handleMouseUp(e) {
+            isTouching = false;
+        }
+
+        function startBeeAnimation() {
+            if (animationFrame) cancelAnimationFrame(animationFrame);
+            
+            let frameCount = 0;
+            
+            function animate() {
+                if (gameOver) return;
+                
+                const boardSize = gameBoard.offsetWidth;
+                const beeSize = 40;
+                const tileSize = boardSize / gridSize;
+                
+                // Safety check
+                if (!bees || bees.length === 0 || !boardSize || boardSize === 0) {
+                    animationFrame = requestAnimationFrame(animate);
+                    return;
+                }
+                
+                frameCount++;
+                
+                // Update each bee
+                for (let beeData of bees) {
+                    // Add random direction changes every 60-120 frames
+                    if (frameCount % Math.floor(60 + Math.random() * 60) === 0) {
+                        const randomAngle = (Math.random() - 0.5) * Math.PI;
+                        const currentAngle = Math.atan2(beeData.velocity.y, beeData.velocity.x);
+                        const newAngle = currentAngle + randomAngle;
+                        const speed = Math.sqrt(beeData.velocity.x ** 2 + beeData.velocity.y ** 2);
+                        beeData.velocity.x = Math.cos(newAngle) * speed;
+                        beeData.velocity.y = Math.sin(newAngle) * speed;
+                    }
+                    
+                    // Continuous subtle direction drift
+                    if (Math.random() < 0.05) {
+                        const driftAngle = (Math.random() - 0.5) * 0.2;
+                        const speed = Math.sqrt(beeData.velocity.x ** 2 + beeData.velocity.y ** 2);
+                        const currentAngle = Math.atan2(beeData.velocity.y, beeData.velocity.x);
+                        const newAngle = currentAngle + driftAngle;
+                        beeData.velocity.x = Math.cos(newAngle) * speed;
+                        beeData.velocity.y = Math.sin(newAngle) * speed;
+                    }
+                    
+                    // Calculate next position
+                    let nextX = beeData.position.x + beeData.velocity.x;
+                    let nextY = beeData.position.y + beeData.velocity.y;
+                    
+                    // Store old velocity for rotation detection
+                    const oldVelocityX = beeData.velocity.x;
+                    const oldVelocityY = beeData.velocity.y;
+                    
+                    // Check collision with filled tiles
+                    const beeCenterX = nextX + beeSize / 2;
+                    const beeCenterY = nextY + beeSize / 2;
+                    const nextRow = Math.floor(beeCenterY / tileSize);
+                    const nextCol = Math.floor(beeCenterX / tileSize);
+                    const nextTileIndex = nextRow * gridSize + nextCol;
+                    
+                    // If next tile is filled, bounce
+                    if (filledTiles.has(nextTileIndex)) {
+                        const currentRow = Math.floor((beeData.position.y + beeSize / 2) / tileSize);
+                        const currentCol = Math.floor((beeData.position.x + beeSize / 2) / tileSize);
+                        
+                        if (nextCol !== currentCol) {
+                            beeData.velocity.x *= -1;
+                            nextX = beeData.position.x;
+                        }
+                        
+                        if (nextRow !== currentRow) {
+                            beeData.velocity.y *= -1;
+                            nextY = beeData.position.y;
+                        }
+                        
+                        const randomAngle = (Math.random() - 0.5) * 0.8;
+                        const speed = Math.sqrt(beeData.velocity.x ** 2 + beeData.velocity.y ** 2);
+                        const currentAngle = Math.atan2(beeData.velocity.y, beeData.velocity.x);
+                        const newAngle = currentAngle + randomAngle;
+                        beeData.velocity.x = Math.cos(newAngle) * speed;
+                        beeData.velocity.y = Math.sin(newAngle) * speed;
+                    }
+                    
+                    // Update position
+                    beeData.position.x = nextX;
+                    beeData.position.y = nextY;
+                    
+                    // Bounce off walls with random angle
+                    if (beeData.position.x <= 0 || beeData.position.x >= boardSize - beeSize) {
+                        beeData.velocity.x *= -1;
+                        beeData.position.x = Math.max(0, Math.min(boardSize - beeSize, beeData.position.x));
+                        const randomVertical = (Math.random() - 0.5) * moveSpeed;
+                        beeData.velocity.y += randomVertical;
+                    }
+                    
+                    if (beeData.position.y <= 0 || beeData.position.y >= boardSize - beeSize) {
+                        beeData.velocity.y *= -1;
+                        beeData.position.y = Math.max(0, Math.min(boardSize - beeSize, beeData.position.y));
+                        const randomHorizontal = (Math.random() - 0.5) * moveSpeed;
+                        beeData.velocity.x += randomHorizontal;
+                    }
+                    
+                    // Normalize speed to keep it consistent
+                    const currentSpeed = Math.sqrt(beeData.velocity.x ** 2 + beeData.velocity.y ** 2);
+                    if (currentSpeed > 0) {
+                        const targetSpeed = moveSpeed * (0.8 + Math.random() * 0.4);
+                        beeData.velocity.x = (beeData.velocity.x / currentSpeed) * targetSpeed;
+                        beeData.velocity.y = (beeData.velocity.y / currentSpeed) * targetSpeed;
+                    }
+                    
+                    // Update target rotation
+                    if (beeData.velocity.x !== oldVelocityX || beeData.velocity.y !== oldVelocityY) {
+                        let angle = Math.atan2(beeData.velocity.y, Math.abs(beeData.velocity.x)) * (180 / Math.PI);
+                        angle = Math.max(-45, Math.min(45, angle));
+                        beeData.targetRotation = angle;
+                    }
+                    
+                    // Smoothly interpolate rotation
+                    let rotationDiff = beeData.targetRotation - beeData.rotation;
+                    if (rotationDiff > 180) rotationDiff -= 360;
+                    if (rotationDiff < -180) rotationDiff += 360;
+                    beeData.rotation += rotationDiff * 0.15;
+                    if (beeData.rotation > 360) beeData.rotation -= 360;
+                    if (beeData.rotation < 0) beeData.rotation += 360;
+                    
+                    updateBeePosition(beeData);
+                }
+                
+                // Check every 30 frames if level is complete (bees might have moved into all empty tiles)
+                if (frameCount % 30 === 0) {
+                    checkLevelComplete();
+                }
+                
+                animationFrame = requestAnimationFrame(animate);
+            }
+            
+            animate();
+        }
+
+        function updateBeePosition(beeData) {
+            beeData.element.style.left = (beeData.position.x - 5) + 'px';
+            beeData.element.style.top = (beeData.position.y - 5) + 'px';
+            
+            const isMovingLeft = beeData.velocity.x < 0;
+            const scaleX = isMovingLeft ? 1 : -1;
+            const tiltAngle = Math.abs(beeData.rotation) > 45 ? (isMovingLeft ? -45 : 45) : beeData.rotation;
+            
+            beeData.element.style.transform = `scaleX(${scaleX}) rotate(${tiltAngle}deg)`;
+        }
+
+        function endGame(won) {
+            gameOver = true;
+            if (animationFrame) cancelAnimationFrame(animationFrame);
+            
+            if (won) {
+                // FORCE STOP all music immediately
+                forceStopAllAudio();
+                
+                // Wait for audio to be fully stopped before playing win sound
+                setTimeout(() => {
+                    playWinSound();
+                }, 150);
+                
+                messageEl.textContent = `🎉 Level ${currentLevel} Complete! Starting Level ${currentLevel + 1}...`;
+                messageEl.className = 'win';
+                
+                // Auto-advance to next level after 2 seconds
+                setTimeout(() => {
+                    initGame(true);
+                }, 2000);
+            } else {
+                // FORCE STOP music immediately when bee dies
+                forceStopAllAudio();
+                
+                // Wait briefly before playing death sound
+                setTimeout(() => {
+                    playBeeDeathSound();
+                }, 100);
+                
+                // Lose a life
+                playerLives--;
+                updateStats();
+                
+                if (playerLives > 0) {
+                    // Player has lives remaining - retry level
+                    messageEl.textContent = `💔 Lost a life! ${playerLives} ${playerLives === 1 ? 'life' : 'lives'} remaining. Retrying level...`;
+                    messageEl.className = 'lose';
+                    bees.forEach(beeData => beeData.element.classList.add('bee-dead'));
+                    
+                    // Auto-retry after 2 seconds
+                    setTimeout(() => {
+                        retryLevel();
+                        // Start music after level is set up
+                        setTimeout(() => {
+                            playBackgroundMusic();
+                        }, 100);
+                    }, 2000);
+                } else {
+                    // Game Over - no lives left
+                    messageEl.textContent = '💀 Game Over! No lives remaining!';
+                    messageEl.className = 'lose';
+                    bees.forEach(beeData => beeData.element.classList.add('bee-dead'));
+                    
+                    // Show controls for restart
+                    controlsEl.classList.remove('hide');
+                }
+            }
+        }
+
+        function cycleDifficulty() {
+            const difficulties = Object.keys(DIFFICULTIES);
+            const currentIndex = difficulties.indexOf(currentDifficulty);
+            const nextIndex = (currentIndex + 1) % difficulties.length;
+            currentDifficulty = difficulties[nextIndex];
+            
+            // Update the display without starting the game
+            difficultyEl.textContent = currentDifficulty;
+            
+            // Update grid size and speed based on new difficulty
+            const baseGrid = DIFFICULTIES[currentDifficulty].grid;
+            const baseSpeed = DIFFICULTIES[currentDifficulty].speed;
+            gridSize = baseGrid + Math.floor((currentLevel - 1) / 3);
+            moveSpeed = baseSpeed * (1 + (currentLevel - 1) * 0.15);
+        }
+
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            restartBtn.addEventListener('click', () => initGame(false));
+            difficultyBtn.addEventListener('click', cycleDifficulty);
+
+            // Handle window resize - update all bees
+            window.addEventListener('resize', () => {
+                if (bees && bees.length > 0) {
+                    bees.forEach(beeData => updateBeePosition(beeData));
+                }
+            });
+
+            // Add global listeners for touch and mouse events
+            gameBoard.addEventListener('touchmove', handleTileEnter, { passive: false });
+            gameBoard.addEventListener('touchend', handleTouchEnd);
+            gameBoard.addEventListener('touchcancel', handleTouchEnd);
+            document.addEventListener('mouseup', handleMouseUp);
+
+            // Show welcome message initially
+            messageEl.textContent = '🐝 Welcome to The Beee! Select difficulty and click Start to begin.';
+            messageEl.className = 'win';
+            
+            // Initialize stats display
+            updateStats();
+        });
+    </script>
+</body>
+</html>
