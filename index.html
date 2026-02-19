@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Beee</title>
+    <title>Bee</title>
     <style>
         * {
             margin: 0;
@@ -85,13 +85,62 @@
             gap: 5px;
         }
 
+        #levelStat {
+            font-size: 32px;
+            font-weight: bold;
+            color: #000000;
+        }
+
+        .heart-with-number {
+            position: relative;
+            display: inline-block;
+            font-size: 28px;
+        }
+
+        .heart-bg {
+            position: relative;
+            z-index: 1;
+        }
+
+        .lives-number {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+        }
+
         .tile-icon {
             display: inline-block;
-            width: 20px;
-            height: 20px;
+            width: 28px;
+            height: 28px;
             background: #4CAF50;
-            border-radius: 3px;
+            border-radius: 4px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .tile-with-number {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tiles-number {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+            pointer-events: none;
         }
 
         #gameBoard {
@@ -334,6 +383,7 @@
             font-size: 18px;
             font-weight: bold;
             min-height: 30px;
+            display: none;
         }
 
         .win {
@@ -355,6 +405,25 @@
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-10px); }
             75% { transform: translateX(10px); }
+        }
+
+        @keyframes tileShine {
+            0% {
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                filter: brightness(1);
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.6);
+                filter: brightness(1.5);
+            }
+            100% {
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                filter: brightness(1);
+            }
+        }
+
+        .tile.victory-shine {
+            animation: tileShine 0.6s ease-in-out infinite;
         }
 
         .bee-dead {
@@ -385,19 +454,22 @@
 <body>
     <div id="gameContainer">
         <div id="header">
-            <h1>🐝 The Beee</h1>
+            <h1>Bee</h1>
             <div id="stats">
-                <div class="stat">
-                    <span>❤️</span>
-                    <span id="lives">3</span>
+                <div class="stat" id="livesStat">
+                    <span class="heart-with-number">
+                        <span class="heart-bg">❤️</span>
+                        <span class="lives-number" id="lives">3</span>
+                    </span>
                 </div>
-                <div class="stat">
-                    <span class="tile-icon"></span>
-                    <span id="tilesLeft">0</span>
+                <div class="stat" id="tilesStat">
+                    <span class="tile-with-number">
+                        <span class="tile-icon"></span>
+                        <span class="tiles-number" id="tilesLeft">0</span>
+                    </span>
                 </div>
-                <div class="stat">
-                    <span>🎮</span>
-                    <span id="level">Level 1</span>
+                <div class="stat" id="levelStat">
+                    <span id="level">1</span>
                 </div>
                 <div class="stat" style="display: none;">
                     <span>🎯</span>
@@ -548,8 +620,8 @@
 
         function updateStats() {
             const tilesLeft = gridSize * gridSize - filledTiles.size - bees.length;
-            tilesLeftEl.textContent = `${tilesLeft} left`;
-            levelEl.textContent = `Level ${currentLevel}`;
+            tilesLeftEl.textContent = tilesLeft;
+            levelEl.textContent = currentLevel;
             livesEl.textContent = playerLives;
             difficultyEl.textContent = currentDifficulty;
         }
@@ -1399,6 +1471,16 @@
             if (animationFrame) cancelAnimationFrame(animationFrame);
             
             if (won) {
+                // Add shine animation to all filled tiles
+                tiles.forEach((tile, index) => {
+                    if (filledTiles.has(index)) {
+                        // Stagger the animation slightly for wave effect
+                        setTimeout(() => {
+                            tile.classList.add('victory-shine');
+                        }, (index % gridSize) * 30);
+                    }
+                });
+                
                 // FORCE STOP all music immediately
                 forceStopAllAudio();
                 
@@ -1488,7 +1570,7 @@
             document.addEventListener('mouseup', handleMouseUp);
 
             // Show welcome message initially
-            messageEl.textContent = '🐝 Welcome to The Beee! Select difficulty and click Start to begin.';
+            messageEl.textContent = 'Welcome to Bee! Click Start to begin.';
             messageEl.className = 'win';
             
             // Initialize stats display
