@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bee</title>
+    <title>Bit the Bee</title>
     <link rel="shortcut icon" href="#">
     <style>
         * {
@@ -559,7 +559,7 @@
 <body>
     <div id="gameContainer">
         <div id="header">
-            <h1>Bee</h1>
+            <h1>Bit the Bee</h1>
             <div id="stats">
                 <div class="stat" id="livesStat">
                     <span class="heart-with-number">
@@ -1710,14 +1710,14 @@
             });
             
             shareBtn.addEventListener('click', async () => {
-                const shareText = `I reached level ${highestLevelEver} in Bee! 🐝 Can you beat my score?`;
+                const shareText = `I reached level ${highestLevelEver} in Bit the Bee! 🐝 Can you beat my score?`;
                 const shareUrl = window.location.href;
                 
                 // Try native share API first (mobile)
                 if (navigator.share) {
                     try {
                         await navigator.share({
-                            title: 'Bee Game',
+                            title: 'Bit the Bee',
                             text: shareText,
                             url: shareUrl
                         });
@@ -1772,7 +1772,7 @@
             document.addEventListener('mouseup', handleMouseUp);
 
             // Show welcome message initially
-            messageEl.textContent = 'Welcome to Bee! Click Start to begin.';
+            messageEl.textContent = 'Welcome to Bit the Bee! Click Start to begin.';
             messageEl.className = 'win';
             
             // Initialize stats display
