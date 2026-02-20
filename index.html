@@ -482,6 +482,67 @@
             background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
         }
 
+        #continueScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px) saturate(180%);
+            -webkit-backdrop-filter: blur(12px) saturate(180%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        #continueBtn {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            min-width: 150px;
+            padding: 15px 30px;
+            font-size: 18px;
+        }
+
+        #continueBtn:hover {
+            background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+        }
+
+        #giveUpBtn {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+            color: white;
+            min-width: 150px;
+            padding: 15px 30px;
+            font-size: 18px;
+        }
+
+        #giveUpBtn:hover {
+            background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+        }
+
+        #interstitialAdScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 250;
+            border-radius: 20px;
+            padding: 40px;
+        }
+
         #message {
             text-align: center;
             margin-top: 20px;
@@ -593,6 +654,23 @@
 
         <div id="message"></div>
 
+        <div id="continueScreen" style="display: none;">
+            <h2 style="font-size: 48px; color: #f44336; margin-bottom: 40px; font-weight: bold;">Game Over?</h2>
+            <div id="adContainer" style="display: none;">
+                <p style="font-size: 32px; font-weight: bold; color: #333; padding: 60px 40px; background: rgba(255, 255, 255, 0.9); border-radius: 15px; margin-bottom: 30px;">Rewarded Ad</p>
+            </div>
+            <div id="continueButtons" class="game-over-buttons">
+                <button id="continueBtn">Continue</button>
+                <button id="giveUpBtn">Give Up</button>
+            </div>
+        </div>
+
+        <div id="interstitialAdScreen" style="display: none;">
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
+                <p style="font-size: 36px; font-weight: bold; color: #333; padding: 80px 60px; background: rgba(255, 255, 255, 0.95); border-radius: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);">Rewarded Interstitial Ad</p>
+            </div>
+        </div>
+
         <div id="gameOverScreen" style="display: none;">
             <h2>Game Over</h2>
             <div class="game-over-stats">
@@ -643,6 +721,12 @@
         const controlsEl = document.getElementById('controls');
         const restartBtn = document.getElementById('restartBtn');
         const difficultyBtn = document.getElementById('difficultyBtn');
+        const continueScreen = document.getElementById('continueScreen');
+        const continueButtons = document.getElementById('continueButtons');
+        const adContainer = document.getElementById('adContainer');
+        const continueBtn = document.getElementById('continueBtn');
+        const giveUpBtn = document.getElementById('giveUpBtn');
+        const interstitialAdScreen = document.getElementById('interstitialAdScreen');
         const gameOverScreen = document.getElementById('gameOverScreen');
         const finalLevelEl = document.getElementById('finalLevel');
         const highestLevelEl = document.getElementById('highestLevel');
@@ -661,8 +745,10 @@
             // Hide controls during gameplay
             controlsEl.classList.add('hide');
             
-            // Hide game over screen
+            // Hide game over screens
             gameOverScreen.style.display = 'none';
+            continueScreen.style.display = 'none';
+            interstitialAdScreen.style.display = 'none';
             
             // Calculate level parameters
             const baseGrid = DIFFICULTIES[currentDifficulty].grid;
@@ -1628,10 +1714,20 @@
                 messageEl.textContent = `🎉 Level ${currentLevel} Complete! Starting Level ${currentLevel + 1}...`;
                 messageEl.className = 'win';
                 
-                // Auto-advance to next level after 2 seconds
-                setTimeout(() => {
-                    initGame(true);
-                }, 2000);
+                // Check if we should show interstitial ad
+                if (shouldShowInterstitialAd(currentLevel)) {
+                    // Show ad after 2 seconds, then advance to next level
+                    setTimeout(() => {
+                        showInterstitialAd(() => {
+                            initGame(true);
+                        });
+                    }, 2000);
+                } else {
+                    // Auto-advance to next level after 2 seconds (no ad)
+                    setTimeout(() => {
+                        initGame(true);
+                    }, 2000);
+                }
             } else {
                 // FORCE STOP music immediately when bee dies
                 forceStopAllAudio();
@@ -1660,24 +1756,14 @@
                         }, 100);
                     }, 2000);
                 } else {
-                    // Game Over - no lives left
-                    messageEl.textContent = '💀 Game Over! No lives remaining!';
+                    // Game Over - no lives left, show continue option first
+                    messageEl.textContent = '💀 Oh no! You killed a bee!';
                     messageEl.className = 'lose';
                     bees.forEach(beeData => beeData.element.classList.add('bee-dead'));
                     
-                    // Check if new high score
-                    const isNewHighScore = currentLevel > highestLevelEver;
-                    if (isNewHighScore) {
-                        highestLevelEver = currentLevel;
-                        localStorage.setItem('beeGameHighestLevel', highestLevelEver);
-                    }
-                    
-                    // Show game over screen after a delay
+                    // Show continue screen after a delay
                     setTimeout(() => {
-                        finalLevelEl.textContent = currentLevel;
-                        highestLevelEl.textContent = highestLevelEver;
-                        newHighScoreEl.style.display = isNewHighScore ? 'inline' : 'none';
-                        gameOverScreen.style.display = 'flex';
+                        continueScreen.style.display = 'flex';
                     }, 1500);
                 }
             }
@@ -1699,10 +1785,74 @@
             moveSpeed = baseSpeed * (1 + (currentLevel - 1) * 0.15);
         }
 
+        function showGameOverScreen() {
+            // Check if new high score
+            const isNewHighScore = currentLevel > highestLevelEver;
+            if (isNewHighScore) {
+                highestLevelEver = currentLevel;
+                localStorage.setItem('beeGameHighestLevel', highestLevelEver);
+            }
+            
+            // Show game over screen
+            finalLevelEl.textContent = currentLevel;
+            highestLevelEl.textContent = highestLevelEver;
+            newHighScoreEl.style.display = isNewHighScore ? 'inline' : 'none';
+            continueScreen.style.display = 'none';
+            gameOverScreen.style.display = 'flex';
+        }
+
+        function shouldShowInterstitialAd(level) {
+            // Show between level 6 and 7 (completing level 6)
+            if (level === 6) return true;
+            
+            // Show every 2 levels after 8 (levels 8, 10, 12, 14, etc.)
+            if (level >= 8 && level % 2 === 0) return true;
+            
+            return false;
+        }
+
+        function showInterstitialAd(callback) {
+            // Show interstitial ad screen
+            interstitialAdScreen.style.display = 'flex';
+            
+            // Hide after 5 seconds and call callback
+            setTimeout(() => {
+                interstitialAdScreen.style.display = 'none';
+                if (callback) callback();
+            }, 5000);
+        }
+
         // Wait for DOM to be fully loaded
         document.addEventListener('DOMContentLoaded', function() {
             restartBtn.addEventListener('click', () => initGame(false));
             difficultyBtn.addEventListener('click', cycleDifficulty);
+            
+            continueBtn.addEventListener('click', () => {
+                // Hide buttons and show ad
+                continueButtons.style.display = 'none';
+                adContainer.style.display = 'block';
+                
+                // Show ad for 5 seconds
+                setTimeout(() => {
+                    // Hide continue screen
+                    continueScreen.style.display = 'none';
+                    adContainer.style.display = 'none';
+                    continueButtons.style.display = 'flex';
+                    
+                    // Restart at same level with 3 new lives
+                    playerLives = 3;
+                    retryLevel();
+                    
+                    // Start music after level setup
+                    setTimeout(() => {
+                        playBackgroundMusic();
+                    }, 100);
+                }, 5000);
+            });
+            
+            giveUpBtn.addEventListener('click', () => {
+                showGameOverScreen();
+            });
             
             playAgainBtn.addEventListener('click', () => {
                 gameOverScreen.style.display = 'none';
