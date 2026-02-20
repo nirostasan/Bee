@@ -377,6 +377,110 @@
             transform: translateY(-2px);
         }
 
+        #gameOverScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            /* Fallback for browsers without backdrop-filter */
+            background: rgba(255, 255, 255, 0.85);
+            /* Modern glassmorphism effect */
+            backdrop-filter: blur(12px) saturate(180%);
+            -webkit-backdrop-filter: blur(12px) saturate(180%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Make title semi-transparent too */
+        #gameOverScreen h2 {
+            font-size: 48px;
+            color: #f44336;
+            margin-bottom: 40px;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 10px 30px;
+            border-radius: 15px;
+        }
+
+        .game-over-stats {
+            width: 100%;
+            max-width: 400px;
+            margin-bottom: 40px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            margin-bottom: 15px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            font-size: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            font-size: 28px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #newHighScore {
+            font-size: 16px;
+            color: #4CAF50;
+            animation: celebrate 0.6s ease infinite;
+        }
+
+        .game-over-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .game-over-buttons button {
+            min-width: 150px;
+            padding: 15px 30px;
+            font-size: 18px;
+        }
+
+        #playAgainBtn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        #playAgainBtn:hover {
+            background: linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%);
+        }
+
+        #shareBtn {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+        }
+
+        #shareBtn:hover {
+            background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+        }
+
         #message {
             text-align: center;
             margin-top: 20px;
@@ -487,6 +591,27 @@
         </div>
 
         <div id="message"></div>
+
+        <div id="gameOverScreen" style="display: none;">
+            <h2>Game Over</h2>
+            <div class="game-over-stats">
+                <div class="stat-row">
+                    <span class="stat-label">Level Reached:</span>
+                    <span class="stat-value" id="finalLevel">1</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Highest Level:</span>
+                    <span class="stat-value">
+                        <span id="highestLevel">1</span>
+                        <span id="newHighScore" style="display: none;">🎉 NEW!</span>
+                    </span>
+                </div>
+            </div>
+            <div class="game-over-buttons">
+                <button id="playAgainBtn">Play Again</button>
+                <button id="shareBtn">Share Score 📤</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -499,6 +624,7 @@
         let currentDifficulty = 'Easy';
         let currentLevel = 1;
         let playerLives = 3;
+        let highestLevelEver = parseInt(localStorage.getItem('beeGameHighestLevel')) || 1;
         let gridSize = DIFFICULTIES[currentDifficulty].grid;
         let moveSpeed = DIFFICULTIES[currentDifficulty].speed;
         let tiles = [];
@@ -516,6 +642,12 @@
         const controlsEl = document.getElementById('controls');
         const restartBtn = document.getElementById('restartBtn');
         const difficultyBtn = document.getElementById('difficultyBtn');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const finalLevelEl = document.getElementById('finalLevel');
+        const highestLevelEl = document.getElementById('highestLevel');
+        const newHighScoreEl = document.getElementById('newHighScore');
+        const playAgainBtn = document.getElementById('playAgainBtn');
+        const shareBtn = document.getElementById('shareBtn');
 
         function initGame(nextLevel = false) {
             if (nextLevel) {
@@ -527,6 +659,9 @@
             
             // Hide controls during gameplay
             controlsEl.classList.add('hide');
+            
+            // Hide game over screen
+            gameOverScreen.style.display = 'none';
             
             // Calculate level parameters
             const baseGrid = DIFFICULTIES[currentDifficulty].grid;
@@ -1529,8 +1664,20 @@
                     messageEl.className = 'lose';
                     bees.forEach(beeData => beeData.element.classList.add('bee-dead'));
                     
-                    // Show controls for restart
-                    controlsEl.classList.remove('hide');
+                    // Check if new high score
+                    const isNewHighScore = currentLevel > highestLevelEver;
+                    if (isNewHighScore) {
+                        highestLevelEver = currentLevel;
+                        localStorage.setItem('beeGameHighestLevel', highestLevelEver);
+                    }
+                    
+                    // Show game over screen after a delay
+                    setTimeout(() => {
+                        finalLevelEl.textContent = currentLevel;
+                        highestLevelEl.textContent = highestLevelEver;
+                        newHighScoreEl.style.display = isNewHighScore ? 'inline' : 'none';
+                        gameOverScreen.style.display = 'flex';
+                    }, 1500);
                 }
             }
         }
@@ -1555,6 +1702,60 @@
         document.addEventListener('DOMContentLoaded', function() {
             restartBtn.addEventListener('click', () => initGame(false));
             difficultyBtn.addEventListener('click', cycleDifficulty);
+            
+            playAgainBtn.addEventListener('click', () => {
+                gameOverScreen.style.display = 'none';
+                initGame(false);
+            });
+            
+            shareBtn.addEventListener('click', async () => {
+                const shareText = `I reached level ${highestLevelEver} in Bee! 🐝 Can you beat my score?`;
+                const shareUrl = window.location.href;
+                
+                // Try native share API first (mobile)
+                if (navigator.share) {
+                    try {
+                        await navigator.share({
+                            title: 'Bee Game',
+                            text: shareText,
+                            url: shareUrl
+                        });
+                        console.log('Shared successfully');
+                    } catch (err) {
+                        if (err.name !== 'AbortError') {
+                            console.log('Share error:', err);
+                        }
+                    }
+                } else {
+                    // Fallback: copy to clipboard
+                    const fullText = `${shareText}\n${shareUrl}`;
+                    
+                    try {
+                        // Modern clipboard API
+                        await navigator.clipboard.writeText(fullText);
+                        alert('✅ Score copied to clipboard!\n\n' + fullText);
+                    } catch (err) {
+                        // Fallback for older browsers or file:// protocol
+                        const textArea = document.createElement('textarea');
+                        textArea.value = fullText;
+                        textArea.style.position = 'fixed';
+                        textArea.style.left = '-999999px';
+                        document.body.appendChild(textArea);
+                        textArea.focus();
+                        textArea.select();
+                        
+                        try {
+                            document.execCommand('copy');
+                            alert('✅ Score copied to clipboard!\n\n' + fullText);
+                        } catch (err2) {
+                            // Ultimate fallback: show the text
+                            alert('Share your score:\n\n' + fullText);
+                        }
+                        
+                        document.body.removeChild(textArea);
+                    }
+                }
+            });
 
             // Handle window resize - update all bees
             window.addEventListener('resize', () => {
