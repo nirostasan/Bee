@@ -58,26 +58,23 @@
         }
 
         #header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 10px;
+            margin-bottom: 15px;
+            width: 100%;
+            overflow: hidden;
         }
 
         h1 {
             color: #333;
             font-size: 24px;
-            flex: 1;
-            min-width: 150px;
+            white-space: nowrap;
         }
 
         #stats {
             display: flex;
-            gap: 15px;
+            gap: 8px;
             font-size: 16px;
             color: #666;
+            flex-wrap: nowrap;
         }
 
         .stat {
@@ -87,9 +84,26 @@
         }
 
         #levelStat {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: bold;
             color: #000000;
+        }
+
+        .sound-btn {
+            background: transparent;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 3px;
+            transition: transform 0.2s;
+        }
+
+        .sound-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .sound-btn:active {
+            transform: scale(0.9);
         }
 
         .heart-with-number {
@@ -620,26 +634,31 @@
 <body>
     <div id="gameContainer">
         <div id="header">
-            <h1>Bit the Bee</h1>
-            <div id="stats">
-                <div class="stat" id="livesStat">
-                    <span class="heart-with-number">
-                        <span class="heart-bg">❤️</span>
-                        <span class="lives-number" id="lives">3</span>
-                    </span>
-                </div>
-                <div class="stat" id="tilesStat">
-                    <span class="tile-with-number">
-                        <span class="tile-icon"></span>
-                        <span class="tiles-number" id="tilesLeft">0</span>
-                    </span>
-                </div>
-                <div class="stat" id="levelStat">
-                    <span id="level">1</span>
-                </div>
-                <div class="stat" style="display: none;">
-                    <span>🎯</span>
-                    <span id="difficulty">Easy</span>
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: nowrap; gap: 10px; box-sizing: border-box;">
+                <h1 style="margin: 0; font-size: 24px; white-space: nowrap; flex-shrink: 1; overflow: hidden; text-overflow: ellipsis;">Bit the Bee</h1>
+                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; flex-shrink: 0;">
+                    <button id="soundToggleBtn" class="sound-btn" style="margin: 0; padding: 3px;">🎵</button>
+                    <div id="stats" style="margin: 0; gap: 6px;">
+                        <div class="stat" id="livesStat">
+                            <span class="heart-with-number">
+                                <span class="heart-bg">❤️</span>
+                                <span class="lives-number" id="lives">3</span>
+                            </span>
+                        </div>
+                        <div class="stat" id="tilesStat">
+                            <span class="tile-with-number">
+                                <span class="tile-icon"></span>
+                                <span class="tiles-number" id="tilesLeft">0</span>
+                            </span>
+                        </div>
+                        <div class="stat" id="levelStat">
+                            <span id="level">1</span>
+                        </div>
+                        <div class="stat" style="display: none;">
+                            <span>🎯</span>
+                            <span id="difficulty">Easy</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -704,6 +723,7 @@
         let currentLevel = 1;
         let playerLives = 3;
         let highestLevelEver = parseInt(localStorage.getItem('beeGameHighestLevel')) || 1;
+        let soundMuted = localStorage.getItem('soundMuted') === 'true' || false;
         let gridSize = DIFFICULTIES[currentDifficulty].grid;
         let moveSpeed = DIFFICULTIES[currentDifficulty].speed;
         let tiles = [];
@@ -721,6 +741,7 @@
         const controlsEl = document.getElementById('controls');
         const restartBtn = document.getElementById('restartBtn');
         const difficultyBtn = document.getElementById('difficultyBtn');
+        const soundToggleBtn = document.getElementById('soundToggleBtn');
         const continueScreen = document.getElementById('continueScreen');
         const continueButtons = document.getElementById('continueButtons');
         const adContainer = document.getElementById('adContainer');
@@ -968,6 +989,9 @@
         };
 
         function playBackgroundMusic() {
+            // Don't play if muted
+            if (soundMuted) return;
+            
             // Stop any existing music first
             stopBackgroundMusic();
             
@@ -1237,6 +1261,7 @@
         }
 
         function playClickSound() {
+            if (soundMuted) return;
             try {
                 const oscillator = audioContext.createOscillator();
                 const gainNode = audioContext.createGain();
@@ -1262,6 +1287,7 @@
         }
 
         function playBeeDeathSound() {
+            if (soundMuted) return;
             try {
                 const now = audioContext.currentTime;
                 
@@ -1308,6 +1334,7 @@
         }
 
         function playWinSound() {
+            if (soundMuted) return;
             try {
                 const now = audioContext.currentTime;
                 
@@ -1927,6 +1954,28 @@
             
             // Initialize stats display
             updateStats();
+            
+            // Initialize sound toggle button
+            soundToggleBtn.innerHTML = soundMuted ? '<span style="position: relative; display: inline-block;">🎵<span style="position: absolute; top: 50%; left: 50%; width: 120%; height: 2px; background: red; transform: translate(-50%, -50%) rotate(-45deg);"></span></span>' : '🎵';
+            
+            // Sound toggle button event listener
+            soundToggleBtn.addEventListener('click', () => {
+                soundMuted = !soundMuted;
+                localStorage.setItem('soundMuted', soundMuted);
+                
+                // Update button icon
+                soundToggleBtn.innerHTML = soundMuted ? '<span style="position: relative; display: inline-block;">🎵<span style="position: absolute; top: 50%; left: 50%; width: 120%; height: 2px; background: red; transform: translate(-50%, -50%) rotate(-45deg);"></span></span>' : '🎵';
+                
+                if (soundMuted) {
+                    // Stop all sounds immediately
+                    forceStopAllAudio();
+                } else {
+                    // Restart music if game is active
+                    if (!gameOver && currentLevel > 0 && !musicPlaying) {
+                        playBackgroundMusic();
+                    }
+                }
+            });
             
             // Create bee favicon
             const canvas = document.createElement('canvas');
