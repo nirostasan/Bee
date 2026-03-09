@@ -81,6 +81,7 @@
             display: flex;
             align-items: center;
             gap: 5px;
+            flex-shrink: 0;
         }
 
         #levelStat {
@@ -104,6 +105,41 @@
 
         .sound-btn:active {
             transform: scale(0.9);
+        }
+
+        .queen-bee-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .queen-bee-btn:active {
+            transform: scale(0.9);
+        }
+        
+        .queen-bee-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            width: 28px;
+            height: 28px;
+            min-width: 28px;
+            background: transparent;
+            border: none;
+        }
+        
+        .queen-bee-btn.blink {
+            animation: queenBeeBlink 0.5s ease-in-out infinite;
+        }
+        
+        @keyframes queenBeeBlink {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.3;
+                transform: scale(1.1);
+            }
         }
 
         .heart-with-number {
@@ -559,11 +595,43 @@
 
         #message {
             text-align: center;
-            margin-top: 20px;
-            font-size: 28px;
+            margin-top: 15px;
+            font-size: 18px;
             font-weight: bold;
             min-height: 30px;
             display: none;
+        }
+        
+        #message.overlay {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 8px 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            white-space: nowrap;
+            margin-top: 0;
+        }
+        
+        #queenBeeRewardMessage {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            display: none;
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 8px 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            white-space: nowrap;
+            color: #4CAF50;
         }
 
         .win {
@@ -639,14 +707,15 @@
 <body>
     <div id="gameContainer">
         <div id="header">
-            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: nowrap; gap: 10px; box-sizing: border-box;">
-                <div style="display: flex; flex-direction: column; align-items: flex-start;">
-                    <h1 style="margin: 0; font-size: 24px; white-space: nowrap; flex-shrink: 1; overflow: hidden; text-overflow: ellipsis;">Bit the Bee</h1>
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: nowrap; gap: 5px; box-sizing: border-box;">
+                <div style="display: flex; flex-direction: column; align-items: flex-start; flex-shrink: 1; min-width: 0;">
+                    <h1 style="margin: 0; font-size: 22px; white-space: nowrap; flex-shrink: 1; overflow: hidden; text-overflow: ellipsis;">Bit the Bee</h1>
                     <div id="bestScore" style="font-size: 11px; color: #999; margin-top: 2px; white-space: nowrap;">Best: Level 1</div>
                 </div>
-                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; flex-shrink: 0;">
+                <div style="display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; flex-shrink: 0;">
                     <button id="soundToggleBtn" class="sound-btn" style="margin: 0; padding: 3px;">🎵</button>
-                    <div id="stats" style="margin: 0; gap: 6px;">
+                    <div id="stats" style="display: flex; margin: 0; gap: 4px; align-items: center; flex-shrink: 0;">
+                        <button id="queenBeeBtn" class="queen-bee-btn" style="display: none; margin: 0; padding: 0; border: none; font-size: 22px; cursor: pointer; transition: all 0.2s;">👑</button>
                         <div class="stat" id="livesStat">
                             <span class="heart-with-number">
                                 <span class="heart-bg">❤️</span>
@@ -680,6 +749,8 @@
         </div>
 
         <div id="message"></div>
+        
+        <div id="queenBeeRewardMessage"></div>
 
         <div id="continueScreen" style="display: none;">
             <h2 style="font-size: 48px; color: #f44336; margin-bottom: 40px; font-weight: bold;">Game Over?</h2>
@@ -743,6 +814,10 @@
         let soundMuted = localStorage.getItem('soundMuted') === 'true' || false;
         let tutorialShown = localStorage.getItem('beeTutorialShown') === 'true' || false;
         let tutorialActive = false;
+        let queenBeeRewardActive = false;
+        let queenBeeUsed = false;
+        let continueCountOnLevel = 0;
+        let lastFailedLevel = -1;
         let gridSize = DIFFICULTIES[currentDifficulty].grid;
         let moveSpeed = DIFFICULTIES[currentDifficulty].speed;
         let tiles = [];
@@ -791,11 +866,13 @@
         const livesEl = document.getElementById('lives');
         const difficultyEl = document.getElementById('difficulty');
         const messageEl = document.getElementById('message');
+        const queenBeeRewardMessageEl = document.getElementById('queenBeeRewardMessage');
         const bestScoreEl = document.getElementById('bestScore');
         const controlsEl = document.getElementById('controls');
         const restartBtn = document.getElementById('restartBtn');
         const difficultyBtn = document.getElementById('difficultyBtn');
         const soundToggleBtn = document.getElementById('soundToggleBtn');
+        const queenBeeBtn = document.getElementById('queenBeeBtn');
         const continueScreen = document.getElementById('continueScreen');
         const continueButtons = document.getElementById('continueButtons');
         const adContainer = document.getElementById('adContainer');
@@ -897,6 +974,13 @@
             } else {
                 currentLevel = 1;
                 playerLives = 3; // Reset lives when starting new game
+                
+                // Reset Queen Bee reward on new game
+                queenBeeRewardActive = false;
+                queenBeeUsed = false;
+                continueCountOnLevel = 0;
+                lastFailedLevel = -1;
+                queenBeeBtn.style.display = 'none';
             }
             
             // Hide controls during gameplay
@@ -1015,6 +1099,54 @@
 
         function updateBestScore() {
             bestScoreEl.textContent = `Best: Level ${highestLevelEver}`;
+        }
+
+        function activateQueenBee() {
+            if (!queenBeeRewardActive || queenBeeUsed) return;
+            
+            // Mark as used
+            queenBeeUsed = true;
+            queenBeeRewardActive = false; // Reset so they can earn it again
+            queenBeeBtn.style.display = 'none';
+            
+            // Stop bee movement
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+                animationFrame = null;
+            }
+            
+            // Pause background music and play magical loop
+            forceStopAllAudio();
+            setTimeout(() => {
+                playQueenBeeMagicLoop();
+            }, 50);
+            
+            // Show activation message
+            messageEl.style.display = 'block';
+            messageEl.textContent = '👑 Queen Bee freeze!';
+            messageEl.className = 'win';
+            
+            // Countdown: 3, 2, 1
+            let countdown = 3;
+            const countdownInterval = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                    messageEl.textContent = `👑 Queen Bee freeze! ${countdown}`;
+                } else {
+                    clearInterval(countdownInterval);
+                    messageEl.style.display = 'none';
+                    messageEl.textContent = '';
+                    
+                    // Stop magic loop and resume music
+                    forceStopAllAudio();
+                    setTimeout(() => {
+                        playBackgroundMusic();
+                    }, 100);
+                    
+                    // Resume bee animation
+                    startBeeAnimation();
+                }
+            }, 1000);
         }
 
         function retryLevel() {
@@ -1540,6 +1672,149 @@
             }
         }
 
+        function playQueenBeeRewardSound() {
+            if (soundMuted) return;
+            try {
+                const now = audioContext.currentTime;
+                
+                // Magical Fairy Dust - quick ascending sparkles with shimmer
+                const notes = [
+                    { freq: 1046.50, time: 0, duration: 0.05 },    // C6
+                    { freq: 1318.51, time: 0.05, duration: 0.05 }, // E6
+                    { freq: 1567.98, time: 0.10, duration: 0.05 }, // G6
+                    { freq: 2093.00, time: 0.15, duration: 0.1 }   // C7 (hold slightly)
+                ];
+                
+                notes.forEach(note => {
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    
+                    osc.type = 'sine'; // Pure, bell-like tone
+                    osc.frequency.setValueAtTime(note.freq, now + note.time);
+                    
+                    // Quick, sparkly envelope
+                    gain.gain.setValueAtTime(0.25, now + note.time);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + note.time + note.duration);
+                    
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+                    
+                    osc.start(now + note.time);
+                    osc.stop(now + note.time + note.duration);
+                });
+                
+                // High sparkles - shimmer effect (fairy dust!)
+                const sparkles = [
+                    { freq: 2637.02, time: 0.16, duration: 0.12 }, // E7
+                    { freq: 3135.96, time: 0.18, duration: 0.1 },  // G7
+                    { freq: 3951.07, time: 0.20, duration: 0.08 }  // B7
+                ];
+                
+                sparkles.forEach(sparkle => {
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(sparkle.freq, now + sparkle.time);
+                    
+                    // Delicate shimmer
+                    gain.gain.setValueAtTime(0.12, now + sparkle.time);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + sparkle.time + sparkle.duration);
+                    
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+                    
+                    osc.start(now + sparkle.time);
+                    osc.stop(now + sparkle.time + sparkle.duration);
+                });
+            } catch (err) {
+                console.error('Queen Bee reward sound error:', err);
+            }
+        }
+
+        function playQueenBeeMagicLoop() {
+            if (soundMuted) return null;
+            try {
+                const now = audioContext.currentTime;
+                const loopDuration = 0.8; // Each loop cycle
+                const oscillators = [];
+                
+                // Create a magical ascending-descending arpeggio that loops
+                function createMagicLoop(startTime) {
+                    // Ascending sparkle
+                    const ascendingNotes = [
+                        { freq: 1046.50, time: 0, duration: 0.15 },    // C6
+                        { freq: 1318.51, time: 0.15, duration: 0.15 }, // E6
+                        { freq: 1567.98, time: 0.3, duration: 0.15 },  // G6
+                    ];
+                    
+                    // Descending shimmer
+                    const descendingNotes = [
+                        { freq: 1567.98, time: 0.45, duration: 0.12 }, // G6
+                        { freq: 1318.51, time: 0.57, duration: 0.12 }, // E6
+                        { freq: 1046.50, time: 0.68, duration: 0.12 }, // C6
+                    ];
+                    
+                    const allNotes = [...ascendingNotes, ...descendingNotes];
+                    
+                    allNotes.forEach(note => {
+                        const osc = audioContext.createOscillator();
+                        const gain = audioContext.createGain();
+                        
+                        osc.type = 'sine'; // Pure, magical tone
+                        osc.frequency.setValueAtTime(note.freq, startTime + note.time);
+                        
+                        // Gentle, flowing envelope
+                        gain.gain.setValueAtTime(0.15, startTime + note.time);
+                        gain.gain.exponentialRampToValueAtTime(0.01, startTime + note.time + note.duration);
+                        
+                        osc.connect(gain);
+                        gain.connect(audioContext.destination);
+                        
+                        osc.start(startTime + note.time);
+                        osc.stop(startTime + note.time + note.duration);
+                        
+                        oscillators.push(osc);
+                    });
+                    
+                    // Add high sparkles for extra magic
+                    const sparkles = [
+                        { freq: 2093, time: 0.3, duration: 0.15 },  // C7
+                        { freq: 2637, time: 0.68, duration: 0.12 }  // E7
+                    ];
+                    
+                    sparkles.forEach(sparkle => {
+                        const osc = audioContext.createOscillator();
+                        const gain = audioContext.createGain();
+                        
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(sparkle.freq, startTime + sparkle.time);
+                        
+                        gain.gain.setValueAtTime(0.08, startTime + sparkle.time);
+                        gain.gain.exponentialRampToValueAtTime(0.01, startTime + sparkle.time + sparkle.duration);
+                        
+                        osc.connect(gain);
+                        gain.connect(audioContext.destination);
+                        
+                        osc.start(startTime + sparkle.time);
+                        osc.stop(startTime + sparkle.time + sparkle.duration);
+                        
+                        oscillators.push(osc);
+                    });
+                }
+                
+                // Create 4 loops (for ~3.2 seconds of magic)
+                for (let i = 0; i < 4; i++) {
+                    createMagicLoop(now + (i * loopDuration));
+                }
+                
+                return oscillators;
+            } catch (err) {
+                console.error('Queen Bee magic loop error:', err);
+                return null;
+            }
+        }
+
         function checkLevelComplete() {
             // Check if level is complete - no more tiles can be safely filled
             // Level is complete when all empty tiles currently have bees on them
@@ -2038,6 +2313,21 @@
             difficultyBtn.addEventListener('click', cycleDifficulty);
             
             continueBtn.addEventListener('click', () => {
+                // Track continues on same level
+                if (lastFailedLevel === currentLevel) {
+                    continueCountOnLevel++;
+                } else {
+                    continueCountOnLevel = 1;
+                    lastFailedLevel = currentLevel;
+                }
+                
+                // Grant Queen Bee reward every time on 5th continue (resets each time)
+                if (continueCountOnLevel === 5) {
+                    queenBeeRewardActive = true;
+                    queenBeeUsed = false;
+                    continueCountOnLevel = 0; // Reset so they can earn it again
+                }
+                
                 // Hide buttons and show ad
                 continueButtons.style.display = 'none';
                 adContainer.style.display = 'block';
@@ -2053,6 +2343,29 @@
                     playerLives = 3;
                     retryLevel();
                     
+                    // Show Queen Bee reward message if just granted
+                    if (queenBeeRewardActive && !queenBeeUsed) {
+                        setTimeout(() => {
+                            queenBeeRewardMessageEl.style.display = 'block';
+                            queenBeeRewardMessageEl.textContent = 'You got Queen Bee reward! Press 👑 to get help!';
+                            queenBeeBtn.style.display = 'inline-flex';
+                            
+                            // Add blink animation to button
+                            queenBeeBtn.classList.add('blink');
+                            
+                            // Play cute reward sound
+                            playQueenBeeRewardSound();
+                            
+                            setTimeout(() => {
+                                queenBeeRewardMessageEl.style.display = 'none';
+                                queenBeeRewardMessageEl.textContent = '';
+                                
+                                // Remove blink animation when message disappears
+                                queenBeeBtn.classList.remove('blink');
+                            }, 3000);
+                        }, 500);
+                    }
+                    
                     // Start music after level setup
                     setTimeout(() => {
                         playBackgroundMusic();
@@ -2062,6 +2375,10 @@
             
             giveUpBtn.addEventListener('click', () => {
                 showGameOverScreen();
+            });
+            
+            queenBeeBtn.addEventListener('click', () => {
+                activateQueenBee();
             });
             
             playAgainBtn.addEventListener('click', () => {
