@@ -602,6 +602,11 @@
             }
         }
 
+        @keyframes bounce {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-10px); }
+        }
+
         .tile.victory-shine {
             animation: tileShine 0.6s ease-in-out infinite;
         }
@@ -690,6 +695,15 @@
             </div>
         </div>
 
+        <div id="tutorialOverlay" style="display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.3); z-index: 250; border-radius: 20px; pointer-events: none;">
+            <div id="tutorialArrow" style="position: absolute; display: none; pointer-events: none; z-index: 300;">
+                <div style="text-align: center; margin-bottom: 10px;">
+                    <div style="font-size: 48px; animation: bounce 0.6s infinite alternate;">👇</div>
+                    <div style="background: rgba(255, 255, 255, 0.95); padding: 12px 20px; border-radius: 12px; font-weight: bold; color: #333; font-size: 18px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); white-space: nowrap;">Click here!</div>
+                </div>
+            </div>
+        </div>
+
         <div id="gameOverScreen" style="display: none;">
             <h2>Game Over</h2>
             <div class="game-over-stats">
@@ -724,6 +738,8 @@
         let playerLives = 3;
         let highestLevelEver = parseInt(localStorage.getItem('beeGameHighestLevel')) || 1;
         let soundMuted = localStorage.getItem('soundMuted') === 'true' || false;
+        let tutorialShown = localStorage.getItem('beeTutorialShown') === 'true' || false;
+        let tutorialActive = false;
         let gridSize = DIFFICULTIES[currentDifficulty].grid;
         let moveSpeed = DIFFICULTIES[currentDifficulty].speed;
         let tiles = [];
@@ -748,12 +764,94 @@
         const continueBtn = document.getElementById('continueBtn');
         const giveUpBtn = document.getElementById('giveUpBtn');
         const interstitialAdScreen = document.getElementById('interstitialAdScreen');
+        const tutorialOverlay = document.getElementById('tutorialOverlay');
+        const tutorialArrow = document.getElementById('tutorialArrow');
         const gameOverScreen = document.getElementById('gameOverScreen');
         const finalLevelEl = document.getElementById('finalLevel');
         const highestLevelEl = document.getElementById('highestLevel');
         const newHighScoreEl = document.getElementById('newHighScore');
         const playAgainBtn = document.getElementById('playAgainBtn');
         const shareBtn = document.getElementById('shareBtn');
+
+        function showTutorial() {
+            // Always use the top-left tile (index 0) for tutorial
+            const safeTileIndex = 0;
+            const tile = tiles[safeTileIndex];
+            
+            // Add highlight to tutorial tile and make it clickable above overlay
+            tile.style.boxShadow = '0 0 20px rgba(76, 175, 80, 0.8), inset 0 0 20px rgba(76, 175, 80, 0.3)';
+            tile.style.border = '3px solid #4CAF50';
+            tile.style.position = 'relative';
+            tile.style.zIndex = '260'; // Above the overlay (250)
+            tile.style.cursor = 'pointer';
+            
+            // Get exact position of the tile relative to game board
+            const boardRect = gameBoard.getBoundingClientRect();
+            const tileRect = tile.getBoundingClientRect();
+            
+            // Calculate tile center position relative to game board
+            const tileCenterX = tileRect.left - boardRect.left + (tileRect.width / 2);
+            const tileCenterY = tileRect.top - boardRect.top + (tileRect.height / 2);
+            
+            // Position arrow to point exactly at the center of the tile
+            // Move further down and to the right to align arrow tip with tile center
+            tutorialArrow.style.display = 'flex';
+            tutorialArrow.style.flexDirection = 'column';
+            tutorialArrow.style.alignItems = 'center';
+            tutorialArrow.style.left = (tileCenterX - 45) + 'px'; // Shift right (reduced offset from 60 to 45)
+            tutorialArrow.style.top = (tileCenterY - 85) + 'px'; // Move down more (changed from -60 to -85)
+            tutorialOverlay.style.display = 'block';
+            
+            // Mark only this tile for tutorial
+            tile.dataset.tutorialTile = 'true';
+        }
+
+        function completeTutorial() {
+            tutorialActive = false;
+            
+            // Remove highlight and special styling from tutorial tile
+            const tutorialTile = tiles[0];
+            if (tutorialTile) {
+                tutorialTile.style.boxShadow = '';
+                tutorialTile.style.border = '';
+                tutorialTile.style.position = '';
+                tutorialTile.style.zIndex = '';
+                tutorialTile.style.cursor = '';
+            }
+            
+            // Hide tutorial elements immediately
+            tutorialArrow.style.display = 'none';
+            tutorialOverlay.style.display = 'none';
+            
+            // Show encouragement message - make it visible!
+            messageEl.style.display = 'block';
+            messageEl.textContent = 'Great! Now continue, just don\'t kill the Bee!';
+            messageEl.className = 'win';
+            messageEl.style.opacity = '1';
+            
+            // Fade out message after 2.5 seconds, then start game
+            setTimeout(() => {
+                // Fade out
+                messageEl.style.transition = 'opacity 0.5s';
+                messageEl.style.opacity = '0';
+                
+                // After fade completes, clear message and start game
+                setTimeout(() => {
+                    messageEl.textContent = '';
+                    messageEl.style.display = 'none';
+                    messageEl.style.opacity = '1';
+                    messageEl.style.transition = '';
+                    
+                    // Mark tutorial as completed
+                    tutorialShown = true;
+                    localStorage.setItem('beeTutorialShown', 'true');
+                    
+                    // Start the game
+                    startBeeAnimation();
+                    playBackgroundMusic();
+                }, 500);
+            }, 2500);
+        }
 
         function initGame(nextLevel = false) {
             if (nextLevel) {
@@ -852,10 +950,16 @@
                     updateBeePosition(beeData);
                 }
                 
-                startBeeAnimation();
-                
-                // Start background music
-                playBackgroundMusic();
+                // Check if tutorial should be shown
+                if (!tutorialShown && currentLevel === 1) {
+                    tutorialActive = true;
+                    showTutorial();
+                } else {
+                    startBeeAnimation();
+                    
+                    // Start background music
+                    playBackgroundMusic();
+                }
             }, 50);
             
             updateStats();
@@ -1445,6 +1549,23 @@
             
             const index = parseInt(e.target.dataset.index);
             
+            // Handle tutorial - ONLY allow clicking tile index 0 (top-left)
+            if (tutorialActive) {
+                console.log('Tutorial active, clicked tile:', index);
+                if (index === 0) {
+                    console.log('Correct tile! Completing tutorial...');
+                    // Correct tile clicked
+                    e.target.classList.add('filled');
+                    filledTiles.add(index);
+                    playClickSound();
+                    completeTutorial();
+                } else {
+                    console.log('Wrong tile, ignoring click');
+                }
+                // Block all clicks during tutorial (whether correct or not)
+                return;
+            }
+            
             // Check if any bee is on this tile with precise collision
             const tileSize = gameBoard.offsetWidth / gridSize;
             const tileRow = Math.floor(index / gridSize);
@@ -1491,6 +1612,9 @@
 
         function handleTileEnter(e) {
             if (gameOver) return;
+            
+            // Block all tile interactions during tutorial
+            if (tutorialActive) return;
             
             // For touch events, find which tile is under the touch
             let targetTile = e.target;
@@ -1561,6 +1685,10 @@
 
         function handleMouseDown(e) {
             if (gameOver) return;
+            
+            // Block mouse down during tutorial (except for tile 0 which is handled in handleTileClick)
+            if (tutorialActive) return;
+            
             isTouching = true;
         }
 
