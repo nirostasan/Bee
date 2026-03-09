@@ -560,7 +560,7 @@
         #message {
             text-align: center;
             margin-top: 20px;
-            font-size: 18px;
+            font-size: 28px;
             font-weight: bold;
             min-height: 30px;
             display: none;
@@ -747,6 +747,40 @@
         let bees = []; // Array to hold multiple bees
         let gameOver = false;
         let animationFrame;
+        
+        // Encouraging messages for level completion with appropriate icons
+        const encouragingMessages = [
+            { text: "Sweet!", icon: "🍯" },
+            { text: "Awesome!", icon: "🌟" },
+            { text: "Fantastic!", icon: "✨" },
+            { text: "Bee-utiful!", icon: "🐝" },
+            { text: "Brilliant!", icon: "💎" },
+            { text: "Amazing!", icon: "🎉" },
+            { text: "Excellent!", icon: "🏆" },
+            { text: "Wonderful!", icon: "🌺" },
+            { text: "Outstanding!", icon: "⭐" },
+            { text: "Spectacular!", icon: "🎊" },
+            { text: "Incredible!", icon: "🚀" },
+            { text: "Magnificent!", icon: "👑" },
+            { text: "Superb!", icon: "💫" },
+            { text: "Terrific!", icon: "🔥" },
+            { text: "Marvelous!", icon: "🌈" },
+            { text: "Perfect!", icon: "💯" },
+            { text: "Splendid!", icon: "🌻" },
+            { text: "Stellar!", icon: "🌠" },
+            { text: "Phenomenal!", icon: "⚡" },
+            { text: "Exceptional!", icon: "🥇" },
+            { text: "You're on fire!", icon: "🔥" },
+            { text: "Unstoppable!", icon: "💪" },
+            { text: "Keep buzzing!", icon: "🐝" },
+            { text: "Bee-lieve it!", icon: "💛" },
+            { text: "Killing it!", icon: "⚔️" },
+            { text: "Like a pro!", icon: "😎" },
+            { text: "Nailed it!", icon: "🔨" },
+            { text: "You rock!", icon: "🤘" },
+            { text: "So smooth!", icon: "🧈" },
+            { text: "Legendary!", icon: "🏅" }
+        ];
 
         const gameBoard = document.getElementById('gameBoard');
         const tilesLeftEl = document.getElementById('tilesLeft');
@@ -864,10 +898,12 @@
             // Hide controls during gameplay
             controlsEl.classList.add('hide');
             
-            // Hide game over screens
+            // Hide game over screens and message
             gameOverScreen.style.display = 'none';
             continueScreen.style.display = 'none';
             interstitialAdScreen.style.display = 'none';
+            messageEl.style.display = 'none';
+            messageEl.textContent = '';
             
             // Calculate level parameters
             const baseGrid = DIFFICULTIES[currentDifficulty].grid;
@@ -1866,7 +1902,12 @@
                     playWinSound();
                 }, 150);
                 
-                messageEl.textContent = `🎉 Level ${currentLevel} Complete! Starting Level ${currentLevel + 1}...`;
+                // Get random encouraging message with its icon
+                const randomMessageObj = encouragingMessages[Math.floor(Math.random() * encouragingMessages.length)];
+                
+                // Show message with icon
+                messageEl.style.display = 'block';
+                messageEl.textContent = `${randomMessageObj.text} ${randomMessageObj.icon}`;
                 messageEl.className = 'win';
                 
                 // Check if we should show interstitial ad
