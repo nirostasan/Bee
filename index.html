@@ -640,7 +640,10 @@
     <div id="gameContainer">
         <div id="header">
             <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: nowrap; gap: 10px; box-sizing: border-box;">
-                <h1 style="margin: 0; font-size: 24px; white-space: nowrap; flex-shrink: 1; overflow: hidden; text-overflow: ellipsis;">Bit the Bee</h1>
+                <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                    <h1 style="margin: 0; font-size: 24px; white-space: nowrap; flex-shrink: 1; overflow: hidden; text-overflow: ellipsis;">Bit the Bee</h1>
+                    <div id="bestScore" style="font-size: 11px; color: #999; margin-top: 2px; white-space: nowrap;">Best: Level 1</div>
+                </div>
                 <div style="display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; flex-shrink: 0;">
                     <button id="soundToggleBtn" class="sound-btn" style="margin: 0; padding: 3px;">🎵</button>
                     <div id="stats" style="margin: 0; gap: 6px;">
@@ -788,6 +791,7 @@
         const livesEl = document.getElementById('lives');
         const difficultyEl = document.getElementById('difficulty');
         const messageEl = document.getElementById('message');
+        const bestScoreEl = document.getElementById('bestScore');
         const controlsEl = document.getElementById('controls');
         const restartBtn = document.getElementById('restartBtn');
         const difficultyBtn = document.getElementById('difficultyBtn');
@@ -1007,6 +1011,10 @@
             levelEl.textContent = currentLevel;
             livesEl.textContent = playerLives;
             difficultyEl.textContent = currentDifficulty;
+        }
+
+        function updateBestScore() {
+            bestScoreEl.textContent = `Best: Level ${highestLevelEver}`;
         }
 
         function retryLevel() {
@@ -1987,6 +1995,7 @@
             if (isNewHighScore) {
                 highestLevelEver = currentLevel;
                 localStorage.setItem('beeGameHighestLevel', highestLevelEver);
+                updateBestScore(); // Update the display
             }
             
             // Show game over screen
@@ -2123,6 +2132,7 @@
             
             // Initialize stats display
             updateStats();
+            updateBestScore();
             
             // Initialize sound toggle button
             soundToggleBtn.innerHTML = soundMuted ? '<span style="position: relative; display: inline-block;">🎵<span style="position: absolute; top: 50%; left: 50%; width: 120%; height: 2px; background: red; transform: translate(-50%, -50%) rotate(-45deg);"></span></span>' : '🎵';
