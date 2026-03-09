@@ -1936,6 +1936,11 @@
                 // FORCE STOP music immediately when bee dies
                 forceStopAllAudio();
                 
+                // Vibrate device (shortest duration - 50ms)
+                if (navigator.vibrate) {
+                    navigator.vibrate(50);
+                }
+                
                 // Wait briefly before playing death sound
                 setTimeout(() => {
                     playBeeDeathSound();
