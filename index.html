@@ -1083,6 +1083,22 @@
                     
                     // Start background music
                     playBackgroundMusic();
+                    
+                    // Show difficulty spike warning right after level starts
+                    const spikeWarning = getDifficultySpike(currentLevel);
+                    if (spikeWarning && nextLevel) {
+                        setTimeout(() => {
+                            messageEl.style.display = 'block';
+                            messageEl.textContent = spikeWarning;
+                            messageEl.className = 'lose'; // Red/warning style
+                            
+                            setTimeout(() => {
+                                messageEl.style.display = 'none';
+                                messageEl.textContent = '';
+                                messageEl.className = '';
+                            }, 3000);
+                        }, 500); // Show warning 500ms after level starts
+                    }
                 }
             }, 50);
             
@@ -1813,6 +1829,28 @@
                 console.error('Queen Bee magic loop error:', err);
                 return null;
             }
+        }
+
+        function getDifficultySpike(level) {
+            // Check if this level has a difficulty spike and return warning message
+            const spikes = {
+                4: `Warning - Level 4: Grid expands to 5×5!`,
+                6: `Warning - Level 6: 2nd bee appears!`,
+                7: `Warning - Level 7: Grid expands to 6×6!`,
+                10: `Warning - Level 10: Grid expands to 7×7!`,
+                11: `Warning - Level 11: 3rd bee appears!`,
+                13: `Warning - Level 13: Grid expands to 8×8!`,
+                16: `Warning - Level 16: Grid expands to 9×9 and 4th bee appears! Much harder!`,
+                19: `Warning - Level 19: Grid expands to 10×10!`,
+                21: `Warning - Level 21: 5th bee appears!`,
+                22: `Warning - Level 22: Grid expands to 11×11!`,
+                25: `Warning - Level 25: Grid expands to 12×12!`,
+                26: `Warning - Level 26: 6th bee appears!`,
+                28: `Warning - Level 28: Grid expands to 13×13!`,
+                31: `Warning - Level 31: Grid expands to 14×14 and 7th bee appears!`,
+            };
+            
+            return spikes[level] || null;
         }
 
         function checkLevelComplete() {
