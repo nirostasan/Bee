@@ -2264,7 +2264,7 @@
                 
                 if (playerLives > 0) {
                     // Player has lives remaining - retry level
-                    showMessage(`💔 Lost a life! ${playerLives} ${playerLives === 1 ? 'life' : 'lives'} remaining. Retrying level...`, 'lose');
+                    // Don't show message - just retry
                     bees.forEach(beeData => beeData.element.classList.add('bee-dead'));
                     
                     // Auto-retry after 2 seconds
@@ -2277,7 +2277,7 @@
                     }, 2000);
                 } else {
                     // Game Over - no lives left, show continue option first
-                    showMessage('💀 Oh no! You killed a bee!', 'lose');
+                    // Don't show message - just show continue screen
                     bees.forEach(beeData => beeData.element.classList.add('bee-dead'));
                     
                     // Show continue screen after a delay
