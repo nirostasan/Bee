@@ -595,11 +595,16 @@
 
         #message {
             text-align: center;
-            margin-top: 15px;
             font-size: 18px;
             font-weight: bold;
-            min-height: 30px;
-            display: none;
+            height: 30px;
+            margin-top: 15px;
+            visibility: hidden;
+            white-space: nowrap;
+        }
+        
+        #message.visible {
+            visibility: visible;
         }
         
         #message.overlay {
@@ -866,6 +871,17 @@
         const livesEl = document.getElementById('lives');
         const difficultyEl = document.getElementById('difficulty');
         const messageEl = document.getElementById('message');
+        
+        // Helper functions to show/hide message without layout shift
+        function showMessage(text, className = '') {
+            messageEl.textContent = text;
+            messageEl.className = className ? `visible ${className}` : 'visible';
+        }
+        
+        function hideMessage() {
+            messageEl.className = '';
+            messageEl.textContent = '';
+        }
         const queenBeeRewardMessageEl = document.getElementById('queenBeeRewardMessage');
         const bestScoreEl = document.getElementById('bestScore');
         const controlsEl = document.getElementById('controls');
@@ -939,9 +955,7 @@
             tutorialOverlay.style.display = 'none';
             
             // Show encouragement message - make it visible!
-            messageEl.style.display = 'block';
-            messageEl.textContent = 'Great! Now continue, just don\'t kill the Bee!';
-            messageEl.className = 'win';
+            showMessage('Great! Now continue, just don\'t kill the Bee!', 'win');
             messageEl.style.opacity = '1';
             
             // Fade out message after 2.5 seconds, then start game
@@ -952,8 +966,7 @@
                 
                 // After fade completes, clear message and start game
                 setTimeout(() => {
-                    messageEl.textContent = '';
-                    messageEl.style.display = 'none';
+                    hideMessage();
                     messageEl.style.opacity = '1';
                     messageEl.style.transition = '';
                     
@@ -990,8 +1003,7 @@
             gameOverScreen.style.display = 'none';
             continueScreen.style.display = 'none';
             interstitialAdScreen.style.display = 'none';
-            messageEl.style.display = 'none';
-            messageEl.textContent = '';
+            hideMessage();
             
             // Calculate level parameters
             const baseGrid = DIFFICULTIES[currentDifficulty].grid;
@@ -1010,8 +1022,6 @@
             filledTiles.clear();
             tiles = [];
             bees = [];
-            messageEl.textContent = '';
-            messageEl.className = '';
             
             // Clear board
             gameBoard.innerHTML = '';
@@ -1088,14 +1098,10 @@
                     const spikeWarning = getDifficultySpike(currentLevel);
                     if (spikeWarning && nextLevel) {
                         setTimeout(() => {
-                            messageEl.style.display = 'block';
-                            messageEl.textContent = spikeWarning;
-                            messageEl.className = 'lose'; // Red/warning style
+                            showMessage(spikeWarning, 'lose');
                             
                             setTimeout(() => {
-                                messageEl.style.display = 'none';
-                                messageEl.textContent = '';
-                                messageEl.className = '';
+                                hideMessage();
                             }, 3000);
                         }, 500); // Show warning 500ms after level starts
                     }
@@ -1138,20 +1144,17 @@
             }, 50);
             
             // Show activation message
-            messageEl.style.display = 'block';
-            messageEl.textContent = '👑 Queen Bee freeze!';
-            messageEl.className = 'win';
+            showMessage('👑 Queen Bee freeze!', 'win');
             
             // Countdown: 3, 2, 1
             let countdown = 3;
             const countdownInterval = setInterval(() => {
                 countdown--;
                 if (countdown > 0) {
-                    messageEl.textContent = `👑 Queen Bee freeze! ${countdown}`;
+                    showMessage(`👑 Queen Bee freeze! ${countdown}`, 'win');
                 } else {
                     clearInterval(countdownInterval);
-                    messageEl.style.display = 'none';
-                    messageEl.textContent = '';
+                    hideMessage();
                     
                     // Stop magic loop and resume music
                     forceStopAllAudio();
@@ -1171,8 +1174,6 @@
             filledTiles.clear();
             tiles = [];
             bees = [];
-            messageEl.textContent = '';
-            messageEl.className = '';
             
             // Hide controls during gameplay
             controlsEl.classList.add('hide');
@@ -2227,9 +2228,7 @@
                 const randomMessageObj = encouragingMessages[Math.floor(Math.random() * encouragingMessages.length)];
                 
                 // Show message with icon
-                messageEl.style.display = 'block';
-                messageEl.textContent = `${randomMessageObj.text} ${randomMessageObj.icon}`;
-                messageEl.className = 'win';
+                showMessage(`${randomMessageObj.text} ${randomMessageObj.icon}`, 'win');
                 
                 // Check if we should show interstitial ad
                 if (shouldShowInterstitialAd(currentLevel)) {
@@ -2265,8 +2264,7 @@
                 
                 if (playerLives > 0) {
                     // Player has lives remaining - retry level
-                    messageEl.textContent = `💔 Lost a life! ${playerLives} ${playerLives === 1 ? 'life' : 'lives'} remaining. Retrying level...`;
-                    messageEl.className = 'lose';
+                    showMessage(`💔 Lost a life! ${playerLives} ${playerLives === 1 ? 'life' : 'lives'} remaining. Retrying level...`, 'lose');
                     bees.forEach(beeData => beeData.element.classList.add('bee-dead'));
                     
                     // Auto-retry after 2 seconds
@@ -2279,8 +2277,7 @@
                     }, 2000);
                 } else {
                     // Game Over - no lives left, show continue option first
-                    messageEl.textContent = '💀 Oh no! You killed a bee!';
-                    messageEl.className = 'lose';
+                    showMessage('💀 Oh no! You killed a bee!', 'lose');
                     bees.forEach(beeData => beeData.element.classList.add('bee-dead'));
                     
                     // Show continue screen after a delay
@@ -2487,8 +2484,7 @@
             document.addEventListener('mouseup', handleMouseUp);
 
             // Show welcome message initially
-            messageEl.textContent = 'Welcome to Bit the Bee! Click Start to begin.';
-            messageEl.className = 'win';
+            showMessage('Welcome to Bit the Bee! Click Start to begin.', 'win');
             
             // Initialize stats display
             updateStats();
