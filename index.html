@@ -1674,7 +1674,7 @@
                     const spikeWarning = getDifficultySpike(currentLevel);
                     if (spikeWarning && nextLevel) {
                         setTimeout(() => {
-                            showMessage('🐝😰 ' + spikeWarning, 'lose');
+                            showMessage(spikeWarning, 'lose');
                             setTimeout(() => {
                                 hideMessage();
                             }, 3000);
