@@ -58,15 +58,71 @@
         }
 
         #header {
-            margin-bottom: 15px;
+            margin-bottom: 5px;
             width: 100%;
             overflow: hidden;
         }
 
-        h1 {
-            color: #333;
-            font-size: 24px;
+        @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&display=swap');
+
+        #gameTitle {
+            margin: 0;
+            position: relative;
+            display: inline-block;
+            animation: titleWiggle 3s ease-in-out infinite;
+            filter: drop-shadow(0 4px 0 #c9720a) drop-shadow(0 5px 10px rgba(255,154,60,0.4));
+        }
+
+        #gameTitle svg {
+            display: block;
+        }
+
+        #gameTitle .title-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Zen Maru Gothic', 'Arial Rounded MT Bold', sans-serif;
+            font-size: 17px;
+            font-weight: 900;
             white-space: nowrap;
+            color: #fff;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            letter-spacing: 0.04em;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        #gameTitle .bee-icon {
+            font-size: 16px;
+            animation: beeBounce 1.5s ease-in-out infinite;
+            display: inline-block;
+        }
+
+        h1 {
+            margin: 0;
+            padding: 0;
+            display: contents;
+        }
+
+        @keyframes titleWiggle {
+            0%, 100% { transform: rotate(-1deg); }
+            50% { transform: rotate(1deg); }
+        }
+
+        @keyframes beeBounce {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-3px); }
+        }
+
+        h1 img {
+            height: 40px;
+            width: auto;
+            display: block;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
         }
 
         #stats {
@@ -87,6 +143,7 @@
         #levelStat {
             font-size: 28px;
             font-weight: bold;
+            padding-left: 6px;
             color: #000000;
         }
 
@@ -219,6 +276,10 @@
             touch-action: none;
             -webkit-user-select: none;
             user-select: none;
+            -webkit-user-drag: none;
+            -khtml-user-drag: none;
+            -moz-user-drag: none;
+            -o-user-drag: none;
         }
 
         #gameBoardInner {
@@ -230,6 +291,8 @@
             display: grid;
             gap: 0px;
             padding: 0px;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
         }
 
         #gameBoard::before {
@@ -258,6 +321,12 @@
             z-index: 2;
             touch-action: none;
             -webkit-tap-highlight-color: transparent;
+            -webkit-user-drag: none;
+            -khtml-user-drag: none;
+            -moz-user-drag: none;
+            -o-user-drag: none;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         .tile:hover {
@@ -266,14 +335,19 @@
         }
 
         .tile.filled {
-            background: transparent;
+            background-repeat: no-repeat;
+            background-color: transparent !important;
+            backdrop-filter: none !important;
             cursor: default;
-            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
+            box-shadow: none;
+            border: none;
+            outline: none;
+            transition: none !important;
+            transform: none !important;
         }
 
         .tile.filled:hover {
-            background: transparent;
-            transform: none;
+            transform: none !important;
         }
 
         .bee {
@@ -391,41 +465,75 @@
         }
 
         button {
-            flex: 1;
-            min-width: 120px;
-            padding: 12px 20px;
+            flex: 0 0 auto;
+            display: inline-block;
+            width: auto;
+            min-width: unset;
+            padding: 12px 24px;
             font-size: 16px;
             border: none;
-            border-radius: 8px;
+            border-radius: 50px;
             cursor: pointer;
-            font-weight: bold;
-            transition: all 0.2s;
+            font-family: 'Zen Maru Gothic', 'Arial Rounded MT Bold', sans-serif;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            white-space: nowrap;
         }
-
         #restartBtn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            min-width: 200px;
-            padding: 20px 50px;
-            font-size: 24px;
-            border-radius: 15px;
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(135deg, #FFD93D 0%, #FF9A3C 100%);
+            color: #fff;
+            padding: 18px 36px;
+            font-size: 22px;
+            border-radius: 50px;
+            box-shadow: 0 5px 0 #c9720a, 0 8px 20px rgba(255, 154, 60, 0.45);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.15);
         }
 
         #restartBtn:hover {
-            background: linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%);
-            transform: translateY(-3px);
-            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.5);
+            transform: translateY(-3px) scale(1.04);
+            box-shadow: 0 8px 0 #c9720a, 0 12px 28px rgba(255, 154, 60, 0.5);
         }
 
         #difficultyBtn {
-            background: #f0f0f0;
-            color: #333;
+            background: linear-gradient(135deg, #e8e8e8 0%, #d0d0d0 100%);
+            color: #555;
+            box-shadow: 0 4px 0 #aaa, 0 6px 12px rgba(0,0,0,0.1);
         }
 
         #difficultyBtn:hover {
-            background: #e0e0e0;
-            transform: translateY(-2px);
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 6px 0 #aaa, 0 8px 16px rgba(0,0,0,0.15);
+        }
+
+        @keyframes btnPop {
+            0%   { transform: scale(1) translateY(0); }
+            25%  { transform: scale(0.93) translateY(3px); }
+            65%  { transform: scale(1.05) translateY(-2px); }
+            100% { transform: scale(1) translateY(0); }
+        }
+
+        @keyframes btnRipple {
+            0%   { transform: scale(0); opacity: 0.35; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+
+        .btn-pop {
+            animation: btnPop 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards !important;
+            transition: none !important;
+        }
+
+        .btn-ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            width: 50px;
+            height: 50px;
+            margin-top: -25px;
+            margin-left: -25px;
+            pointer-events: none;
+            animation: btnRipple 0.4s ease-out forwards;
         }
 
         #gameOverScreen {
@@ -515,21 +623,27 @@
         }
 
         #playAgainBtn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(135deg, #FFD93D 0%, #FF9A3C 100%);
+            color: #fff;
+            box-shadow: 0 4px 0 #c9720a, 0 6px 16px rgba(255, 154, 60, 0.4);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.15);
         }
 
         #playAgainBtn:hover {
-            background: linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 7px 0 #c9720a, 0 10px 22px rgba(255, 154, 60, 0.5);
         }
 
         #shareBtn {
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-            color: white;
+            background: linear-gradient(135deg, #FF9EBC 0%, #FF6B9D 100%);
+            color: #fff;
+            box-shadow: 0 4px 0 #c94472, 0 6px 16px rgba(255, 107, 157, 0.4);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.15);
         }
 
         #shareBtn:hover {
-            background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 7px 0 #c94472, 0 10px 22px rgba(255, 107, 157, 0.5);
         }
 
         #continueScreen {
@@ -552,27 +666,31 @@
         }
 
         #continueBtn {
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-            color: white;
-            min-width: 150px;
+            background: linear-gradient(135deg, #A8E6A3 0%, #56C759 100%);
+            color: #fff;
             padding: 15px 30px;
             font-size: 18px;
+            box-shadow: 0 4px 0 #2e8b34, 0 6px 16px rgba(86, 199, 89, 0.4);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.15);
         }
 
         #continueBtn:hover {
-            background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 7px 0 #2e8b34, 0 10px 22px rgba(86, 199, 89, 0.5);
         }
 
         #giveUpBtn {
-            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
-            color: white;
-            min-width: 150px;
+            background: linear-gradient(135deg, #FFB3B3 0%, #FF6B6B 100%);
+            color: #fff;
             padding: 15px 30px;
             font-size: 18px;
+            box-shadow: 0 4px 0 #c43a3a, 0 6px 16px rgba(255, 107, 107, 0.4);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.15);
         }
 
         #giveUpBtn:hover {
-            background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 7px 0 #c43a3a, 0 10px 22px rgba(255, 107, 107, 0.5);
         }
 
         #interstitialAdScreen {
@@ -593,21 +711,54 @@
             padding: 40px;
         }
 
+        @keyframes wordDrop {
+            0%   { transform: translateY(-40px) scale(0.5); opacity: 0; }
+            55%  { transform: translateY(6px) scale(1.15); opacity: 1; }
+            75%  { transform: translateY(-4px) scale(0.95); }
+            90%  { transform: translateY(2px) scale(1.02); }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        @keyframes floatUp {
+            0%   { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-90px) scale(0.4) rotate(var(--rot)); opacity: 0; }
+        }
+
         #message {
             text-align: center;
-            font-size: 18px;
-            font-weight: bold;
-            min-height: 60px;
+            font-size: 22px;
+            font-weight: 900;
+            font-family: 'Zen Maru Gothic', 'Arial Rounded MT Bold', sans-serif;
+            height: 60px;
             margin-top: 15px;
             visibility: hidden;
             white-space: normal;
             line-height: 1.4;
             max-width: 100%;
             word-wrap: break-word;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        
+
         #message.visible {
             visibility: visible;
+        }
+
+        #message .msg-word {
+            display: inline-block;
+            margin: 0 3px;
+            opacity: 0;
+            animation: wordDrop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .msg-emoji-particle {
+            position: fixed;
+            font-size: 22px;
+            pointer-events: none;
+            z-index: 9999;
+            animation: floatUp 1.1s ease-out forwards;
         }
         
         #message.overlay {
@@ -647,9 +798,111 @@
             animation: celebrate 0.5s ease;
         }
 
+        @keyframes beeDeliveryIn {
+            0%   { right: -120%; opacity: 1; }
+            70%  { right: 12px; }
+            85%  { right: 26px; }
+            100% { right: 20px; }
+        }
+
+        @keyframes beeDeliveryOut {
+            0%   { right: 20px; opacity: 1; }
+            100% { right: 110%; opacity: 0.7; }
+        }
+
+        @keyframes beeBodyBob {
+            0%, 100% { transform: translateY(0px) rotate(-5deg); }
+            50%       { transform: translateY(-5px) rotate(5deg); }
+        }
+
+        @keyframes beeWingFlap {
+            0%, 100% { transform: scaleY(1) rotate(-20deg); }
+            50%       { transform: scaleY(0.3) rotate(-20deg); }
+        }
+
+        #beeDelivery {
+            position: absolute;
+            top: 45%;
+            right: 20px;
+            transform: translateX(120%);
+            z-index: 300;
+            display: flex;
+            align-items: center;
+            gap: 0;
+            pointer-events: none;
+            max-width: 85%;
+        }
+
+        #beeDelivery.fly-in {
+            animation: beeDeliveryIn 0.9s cubic-bezier(0.34, 1.3, 0.64, 1) forwards;
+        }
+
+        #beeDelivery.fly-out {
+            animation: beeDeliveryOut 0.8s ease-in forwards;
+        }
+
+        #beeDelivery .delivery-bee {
+            font-size: 28px;
+            display: inline-block;
+            animation: beeBodyBob 0.4s ease-in-out infinite;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            z-index: 2;
+        }
+
+        #beeDelivery .delivery-string {
+            width: 18px;
+            height: 2px;
+            background: repeating-linear-gradient(90deg, #c9720a 0px, #c9720a 4px, transparent 4px, transparent 7px);
+            align-self: center;
+            margin-top: -4px;
+        }
+
+        #beeDelivery .delivery-banner {
+            background: linear-gradient(135deg, #FFF8DC, #FFE066);
+            border: 2px solid #c9720a;
+            border-radius: 10px;
+            padding: 8px 14px;
+            font-family: 'Zen Maru Gothic', 'Arial Rounded MT Bold', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: #8B4513;
+            white-space: nowrap;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15), 0 1px 0 rgba(255,255,255,0.8) inset;
+            max-width: 240px;
+            white-space: normal;
+            text-align: center;
+            line-height: 1.3;
+        }
+
         .lose {
-            color: #f44336;
-            animation: shake 0.5s ease;
+            color: #8B4513;
+            background: linear-gradient(135deg, #FFF8DC, #FFE066);
+            border: 2px solid #c9720a;
+            border-radius: 50px;
+            padding: 8px 20px;
+            font-family: 'Zen Maru Gothic', 'Arial Rounded MT Bold', sans-serif;
+            font-size: 15px;
+            box-shadow: 0 3px 0 #c9720a, 0 5px 12px rgba(201,114,10,0.25);
+            position: absolute;
+            white-space: nowrap;
+            animation: cuteWiggle 0.6s ease forwards, nervousShimmy 0.5s ease 0.6s infinite;
+        }
+
+        @keyframes cuteWiggle {
+            0%   { transform: scale(0.5) rotate(0deg); opacity: 0; }
+            40%  { transform: scale(1.15) rotate(-4deg); opacity: 1; }
+            60%  { transform: scale(0.95) rotate(3deg); }
+            80%  { transform: scale(1.05) rotate(-2deg); }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        @keyframes nervousShimmy {
+            0%   { transform: rotate(0deg) translateX(0); }
+            20%  { transform: rotate(-2deg) translateX(-3px); }
+            40%  { transform: rotate(2deg) translateX(3px); }
+            60%  { transform: rotate(-1.5deg) translateX(-2px); }
+            80%  { transform: rotate(1.5deg) translateX(2px); }
+            100% { transform: rotate(0deg) translateX(0); }
         }
 
         @keyframes celebrate {
@@ -700,7 +953,15 @@
 
         @media (max-width: 400px) {
             h1 {
+                font-size: 22px;
+            }
+            h1::before {
+                left: -30px;
                 font-size: 20px;
+            }
+            h1::after {
+                right: -26px;
+                font-size: 18px;
             }
             #stats {
                 font-size: 14px;
@@ -717,11 +978,33 @@
         <div id="header">
             <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: nowrap; gap: 5px; box-sizing: border-box;">
                 <div style="display: flex; flex-direction: column; align-items: flex-start; flex-shrink: 1; min-width: 0;">
-                    <h1 style="margin: 0; font-size: 22px; white-space: nowrap; flex-shrink: 1; overflow: hidden; text-overflow: ellipsis;">Bit the Bee</h1>
-                    <div id="bestScore" style="font-size: 11px; color: #999; margin-top: 2px; white-space: nowrap;">Best: Level 1</div>
+                    <div id="gameTitle" style="margin-left: -14px; margin-top: 8px;">
+                        <!-- 3 tiled flat-top hexagons side by side. Each hex: width=58, height=50, pointy-side left/right -->
+                        <!-- Using pointy-top hex: w=52, h=60, offset rows -->
+                        <svg width="174" height="54" viewBox="0 0 174 54" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Flat-top hexagons: points at left/right. w=58, h=50, centered at y=27 -->
+                            <!-- hex 1: cx=29 -->
+                            <polygon points="14,27 21.5,13 36.5,13 44,27 36.5,41 21.5,41" fill="#FFD93D" stroke="none"/>
+                            <!-- hex 2: cx=87 (adjacent, shares edge) -->
+                            <polygon points="72,27 79.5,13 94.5,13 102,27 94.5,41 79.5,41" fill="#FFD93D" stroke="none"/>
+                            <!-- hex 3: cx=145 -->
+                            <polygon points="130,27 137.5,13 152.5,13 160,27 152.5,41 137.5,41" fill="#FFD93D" stroke="none"/>
+                            <!-- connecting fill between hex 1 and 2 -->
+                            <polygon points="44,27 36.5,13 79.5,13 72,27 79.5,41 36.5,41" fill="#FFD93D" stroke="none"/>
+                            <!-- connecting fill between hex 2 and 3 -->
+                            <polygon points="102,27 94.5,13 137.5,13 130,27 137.5,41 94.5,41" fill="#FFD93D" stroke="none"/>
+                        </svg>
+                        <div class="title-text">
+                            <span class="bee-icon">🐝</span>
+                            <span>Bit the Bee</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px; margin-top: 2px;">
+                        <div id="bestScore" style="font-size: 11px; color: #999; white-space: nowrap;">Best: Level 1</div>
+                        <button id="soundToggleBtn" class="sound-btn" style="margin: 0; padding: 2px; font-size: 14px; line-height: 1;">🎵</button>
+                    </div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; flex-shrink: 0;">
-                    <button id="soundToggleBtn" class="sound-btn" style="margin: 0; padding: 3px;">🎵</button>
                     <div id="stats" style="display: flex; margin: 0; gap: 4px; align-items: center; flex-shrink: 0;">
                         <button id="queenBeeBtn" class="queen-bee-btn" style="display: none; margin: 0; padding: 0; border: none; font-size: 22px; cursor: pointer; transition: all 0.2s;">👑</button>
                         <div class="stat" id="livesStat">
@@ -749,6 +1032,12 @@
         </div>
 
         <div id="gameBoard">
+        </div>
+
+        <div id="beeDelivery" style="display:none;">
+            <div class="delivery-bee">🐝</div>
+            <div class="delivery-string"></div>
+            <div class="delivery-banner" id="deliveryBannerText"></div>
         </div>
 
         <div id="controls">
@@ -803,7 +1092,7 @@
             </div>
             <div class="game-over-buttons">
                 <button id="playAgainBtn">Play Again</button>
-                <button id="shareBtn">Share Score 📤</button>
+                <button id="shareBtn">Share Score</button>
             </div>
         </div>
     </div>
@@ -815,8 +1104,204 @@
             'Hard': { grid: 6, speed: 3.5 }
         };
 
+        // Level themes - each level has a unique emoji and color
+        const LEVEL_THEMES = [
+            { emoji: '🌸', color: '#FFB6C1' }, // Level 1 - Pink flower
+            { emoji: '🌻', color: '#FFD700' }, // Level 2 - Sunflower yellow
+            { emoji: '🌺', color: '#FF69B4' }, // Level 3 - Hibiscus pink
+            { emoji: '🌼', color: '#FFEB3B' }, // Level 4 - Daisy yellow
+            { emoji: '🌷', color: '#FF6B9D' }, // Level 5 - Tulip pink
+            { emoji: '🍓', color: '#FF4444' }, // Level 6 - Strawberry red
+            { emoji: '🍊', color: '#FF8C00' }, // Level 7 - Orange
+            { emoji: '🍋', color: '#FFF44F' }, // Level 8 - Lemon yellow
+            { emoji: '🍉', color: '#FF6B6B' }, // Level 9 - Watermelon red
+            { emoji: '🍇', color: '#9370DB' }, // Level 10 - Grapes purple
+            { emoji: '🍒', color: '#DC143C' }, // Level 11 - Cherry red
+            { emoji: '🍑', color: '#FFDAB9' }, // Level 12 - Peach
+            { emoji: '🥝', color: '#90EE90' }, // Level 13 - Kiwi green
+            { emoji: '🍍', color: '#FFD700' }, // Level 14 - Pineapple yellow
+            { emoji: '🥥', color: '#8B4513' }, // Level 15 - Coconut brown
+            { emoji: '🦋', color: '#87CEEB' }, // Level 16 - Butterfly blue
+            { emoji: '🐠', color: '#4682B4' }, // Level 17 - Fish blue
+            { emoji: '🐙', color: '#FF1493' }, // Level 18 - Octopus pink
+            { emoji: '🦀', color: '#FF6347' }, // Level 19 - Crab red
+            { emoji: '🐚', color: '#F0E68C' }, // Level 20 - Shell khaki
+            { emoji: '🌈', color: '#9370DB' }, // Level 21 - Rainbow purple
+            { emoji: '⭐', color: '#FFD700' }, // Level 22 - Star gold
+            { emoji: '💎', color: '#00CED1' }, // Level 23 - Diamond cyan
+            { emoji: '🎈', color: '#FF69B4' }, // Level 24 - Balloon pink
+            { emoji: '🎨', color: '#FF6347' }, // Level 25 - Palette red
+            { emoji: '🌙', color: '#F0E68C' }, // Level 26 - Moon khaki
+            { emoji: '☀️', color: '#FFA500' }, // Level 27 - Sun orange
+            { emoji: '🌟', color: '#FFD700' }, // Level 28 - Sparkle gold
+            { emoji: '💫', color: '#87CEEB' }, // Level 29 - Dizzy blue
+            { emoji: '✨', color: '#DDA0DD' }, // Level 30 - Sparkles plum
+        ];
+
+        // Function to get level theme (cycles through themes if level > 30)
+        function getLevelTheme(level) {
+            const index = (level - 1) % LEVEL_THEMES.length;
+            return LEVEL_THEMES[index];
+        }
+
+        // Function to calculate background position and size for seamless pattern across entire grid
+        function getTileBackgroundStyle(index, gridSize, tileSize) {
+            const row = Math.floor(index / gridSize);
+            const col = index % gridSize;
+            
+            // Total grid size in pixels
+            const totalGridSize = gridSize * tileSize;
+            
+            // Position this tile's view of the overall pattern
+            const x = -(col * tileSize);
+            const y = -(row * tileSize);
+            
+            return {
+                size: `${totalGridSize}px ${totalGridSize}px`,
+                position: `${x}px ${y}px`
+            };
+        }
+
+        // Function to calculate which borders to show (only outer edges of filled region)
+        function calculateBorders(index, gridSize) {
+            const row = Math.floor(index / gridSize);
+            const col = index % gridSize;
+            
+            const borders = [];
+            
+            // Check top
+            const topIndex = index - gridSize;
+            if (row === 0 || !filledTiles.has(topIndex)) {
+                borders.push('top');
+            }
+            
+            // Check right
+            const rightIndex = index + 1;
+            if (col === gridSize - 1 || !filledTiles.has(rightIndex)) {
+                borders.push('right');
+            }
+            
+            // Check bottom
+            const bottomIndex = index + gridSize;
+            if (row === gridSize - 1 || !filledTiles.has(bottomIndex)) {
+                borders.push('bottom');
+            }
+            
+            // Check left
+            const leftIndex = index - 1;
+            if (col === 0 || !filledTiles.has(leftIndex)) {
+                borders.push('left');
+            }
+            
+            return borders;
+        }
+
+        // Function to apply borders to a tile
+        function applyTileBorders(tile, borders) {
+            const borderWidth = '2px';
+            const borderColor = 'rgba(0, 0, 0, 0.15)';
+            
+            tile.style.borderTop = borders.includes('top') ? `${borderWidth} solid ${borderColor}` : 'none';
+            tile.style.borderRight = borders.includes('right') ? `${borderWidth} solid ${borderColor}` : 'none';
+            tile.style.borderBottom = borders.includes('bottom') ? `${borderWidth} solid ${borderColor}` : 'none';
+            tile.style.borderLeft = borders.includes('left') ? `${borderWidth} solid ${borderColor}` : 'none';
+        }
+
+        // Function to update all filled tile borders
+        function updateAllFilledTileBorders() {
+            tiles.forEach((tile, index) => {
+                if (filledTiles.has(index)) {
+                    const borders = calculateBorders(index, gridSize);
+                    applyTileBorders(tile, borders);
+                }
+            });
+        }
+
+        // Batched border update for smooth dragging
+        function requestBorderUpdate() {
+            if (!borderUpdatePending) {
+                borderUpdatePending = true;
+                requestAnimationFrame(() => {
+                    updateAllFilledTileBorders();
+                    borderUpdatePending = false;
+                });
+            }
+        }
+
+        // Function to generate pattern background for a level
+        function generateLevelPattern(level) {
+            const theme = getLevelTheme(level);
+            const canvas = document.createElement('canvas');
+            canvas.width = 800;
+            canvas.height = 800;
+            const ctx = canvas.getContext('2d');
+            
+            // Fill background with theme color
+            ctx.fillStyle = theme.color + '44'; // Add alpha for transparency
+            ctx.fillRect(0, 0, 800, 800);
+            
+            // Create pattern with much bigger emojis and lots of spacing
+            const emojiSizes = [100, 120, 140, 160]; // Much bigger sizes
+            const positions = []; // Track positions to avoid overlap
+            const numberOfEmojis = 20; // Fewer emojis for much more space
+            
+            // Try to place emojis without overlap
+            let attempts = 0;
+            const maxAttempts = 1000;
+            
+            while (positions.length < numberOfEmojis && attempts < maxAttempts) {
+                attempts++;
+                
+                const size = emojiSizes[Math.floor(Math.random() * emojiSizes.length)];
+                const x = Math.random() * (800 - size) + size / 2;
+                const y = Math.random() * (800 - size) + size / 2;
+                const radius = size / 2;
+                
+                // Check if this position overlaps with existing emojis
+                let overlaps = false;
+                for (let pos of positions) {
+                    const dx = x - pos.x;
+                    const dy = y - pos.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    const minDistance = radius + pos.radius + 60; // 60px spacing (much bigger gaps!)
+                    
+                    if (distance < minDistance) {
+                        overlaps = true;
+                        break;
+                    }
+                }
+                
+                // If no overlap, place the emoji with full 360° random rotation
+                if (!overlaps) {
+                    positions.push({ x, y, size, radius });
+                    
+                    // Save canvas state
+                    ctx.save();
+                    
+                    // Move to emoji position
+                    ctx.translate(x, y);
+                    
+                    // Random rotation from 0° to 360° - each emoji tilted completely differently!
+                    const rotation = Math.random() * 2 * Math.PI;
+                    ctx.rotate(rotation);
+                    
+                    // Draw emoji at origin (0, 0) since we translated
+                    ctx.font = `${size}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(theme.emoji, 0, 0);
+                    
+                    // Restore canvas state
+                    ctx.restore();
+                }
+            }
+            
+            return canvas.toDataURL();
+        }
+        
         let currentDifficulty = 'Easy';
         let currentLevel = 1;
+        let currentLevelPattern = '';
         let playerLives = 3;
         let highestLevelEver = parseInt(localStorage.getItem('beeGameHighestLevel')) || 1;
         let soundMuted = localStorage.getItem('soundMuted') === 'true' || false;
@@ -869,6 +1354,15 @@
         ];
 
         const gameBoard = document.getElementById('gameBoard');
+        
+        // Prevent default drag and scroll behavior on game board
+        gameBoard.addEventListener('dragstart', (e) => e.preventDefault());
+        gameBoard.addEventListener('touchmove', (e) => {
+            if (isTouching) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+        
         const tilesLeftEl = document.getElementById('tilesLeft');
         const levelEl = document.getElementById('level');
         const livesEl = document.getElementById('lives');
@@ -877,13 +1371,74 @@
         
         // Helper functions to show/hide message without layout shift
         function showMessage(text, className = '') {
-            messageEl.textContent = text;
-            messageEl.className = className ? `visible ${className}` : 'visible';
+            messageEl.className = '';
+            messageEl.innerHTML = '';
+
+            if (className === 'win') {
+                // Split into words and animate each one dropping in
+                const words = text.split(' ');
+                words.forEach((word, i) => {
+                    const span = document.createElement('span');
+                    span.className = 'msg-word';
+                    span.textContent = word;
+                    span.style.animationDelay = `${i * 0.1}s`;
+                    messageEl.appendChild(span);
+                });
+                messageEl.className = 'visible win';
+
+                // Burst floating emojis from the message position
+                const emojis = ['🐝','🌸','✨','🍯','🌼','💛','⭐','🌺'];
+                const rect = messageEl.getBoundingClientRect();
+                const cx = rect.left + rect.width / 2;
+                const cy = rect.top + rect.height / 2;
+
+                for (let i = 0; i < 10; i++) {
+                    const el = document.createElement('div');
+                    el.className = 'msg-emoji-particle';
+                    el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                    const angle = (Math.random() * 360);
+                    const spread = 40 + Math.random() * 60;
+                    el.style.left = (cx + Math.cos(angle * Math.PI/180) * spread) + 'px';
+                    el.style.top = (cy + Math.sin(angle * Math.PI/180) * spread * 0.5) + 'px';
+                    el.style.setProperty('--rot', `${-30 + Math.random() * 60}deg`);
+                    el.style.animationDelay = `${i * 0.07}s`;
+                    document.body.appendChild(el);
+                    setTimeout(() => el.remove(), 1400);
+                }
+            } else {
+                messageEl.textContent = text;
+                messageEl.className = className ? `visible ${className}` : 'visible';
+            }
         }
-        
+
         function hideMessage() {
             messageEl.className = '';
-            messageEl.textContent = '';
+            messageEl.innerHTML = '';
+        }
+
+        function showBeeDelivery(text, duration = 3000) {
+            const delivery = document.getElementById('beeDelivery');
+            const banner = document.getElementById('deliveryBannerText');
+            if (!delivery || !banner) return;
+
+            // Reset
+            delivery.className = '';
+            delivery.style.display = 'flex';
+            banner.textContent = text;
+
+            // Fly in
+            void delivery.offsetWidth;
+            delivery.classList.add('fly-in');
+
+            // Fly out after duration
+            setTimeout(() => {
+                delivery.classList.remove('fly-in');
+                delivery.classList.add('fly-out');
+                setTimeout(() => {
+                    delivery.style.display = 'none';
+                    delivery.className = '';
+                }, 800);
+            }, duration);
         }
         const queenBeeRewardMessageEl = document.getElementById('queenBeeRewardMessage');
         const bestScoreEl = document.getElementById('bestScore');
@@ -1021,6 +1576,9 @@
             // Add second bee at level 5, third at level 10, etc.
             const numBees = Math.floor((currentLevel - 1) / 5) + 1;
             
+            // Generate pattern for this level
+            currentLevelPattern = generateLevelPattern(currentLevel);
+            
             gameOver = false;
             filledTiles.clear();
             tiles = [];
@@ -1101,8 +1659,7 @@
                     const spikeWarning = getDifficultySpike(currentLevel);
                     if (spikeWarning && nextLevel) {
                         setTimeout(() => {
-                            showMessage(spikeWarning, 'lose');
-                            
+                            showMessage('🐝😰 ' + spikeWarning, 'lose');
                             setTimeout(() => {
                                 hideMessage();
                             }, 3000);
@@ -1249,6 +1806,7 @@
         }
 
         let isTouching = false;
+        let borderUpdatePending = false;
 
         // Create audio context for sound effects
         let audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -1917,7 +2475,20 @@
                     console.log('Correct tile! Completing tutorial...');
                     // Correct tile clicked
                     e.target.classList.add('filled');
+                    
+                    // Calculate tile size and apply pattern
+                    const tileSize = gameBoard.offsetWidth / gridSize;
+                    const bgStyle = getTileBackgroundStyle(index, gridSize, tileSize);
+                    
+                    e.target.style.backgroundImage = `url(${currentLevelPattern})`;
+                    e.target.style.backgroundSize = bgStyle.size;
+                    e.target.style.backgroundPosition = bgStyle.position;
+                    
                     filledTiles.add(index);
+                    
+                    // Update borders for all filled tiles
+                    updateAllFilledTileBorders();
+                    
                     playClickSound();
                     completeTutorial();
                 } else {
@@ -1963,6 +2534,18 @@
             if (!filledTiles.has(index)) {
                 filledTiles.add(index);
                 e.target.classList.add('filled');
+                
+                // Calculate tile size and apply pattern
+                const tileSize = gameBoard.offsetWidth / gridSize;
+                const bgStyle = getTileBackgroundStyle(index, gridSize, tileSize);
+                
+                e.target.style.backgroundImage = `url(${currentLevelPattern})`;
+                e.target.style.backgroundSize = bgStyle.size;
+                e.target.style.backgroundPosition = bgStyle.position;
+                
+                // Update borders for all filled tiles
+                updateAllFilledTileBorders();
+                
                 playClickSound(); // Play satisfying click sound
                 updateStats();
                 
@@ -2032,6 +2615,18 @@
             if (!filledTiles.has(index)) {
                 filledTiles.add(index);
                 targetTile.classList.add('filled');
+                
+                // Calculate tile size and apply pattern
+                const tileSize = gameBoard.offsetWidth / gridSize;
+                const bgStyle = getTileBackgroundStyle(index, gridSize, tileSize);
+                
+                targetTile.style.backgroundImage = `url(${currentLevelPattern})`;
+                targetTile.style.backgroundSize = bgStyle.size;
+                targetTile.style.backgroundPosition = bgStyle.position;
+                
+                // Request border update (batched for performance)
+                requestBorderUpdate();
+                
                 playClickSound(); // Play satisfying click sound
                 updateStats();
                 
@@ -2345,9 +2940,111 @@
             }, 5000);
         }
 
+        // Generate a welcome pattern for the start screen
+        function generateWelcomePattern() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 800;
+            canvas.height = 800;
+            const ctx = canvas.getContext('2d');
+
+            // Soft warm background gradient
+            const bg = ctx.createLinearGradient(0, 0, 800, 800);
+            bg.addColorStop(0, '#FFF9E6');
+            bg.addColorStop(0.5, '#FFF0C8');
+            bg.addColorStop(1, '#FFE4A0');
+            ctx.fillStyle = bg;
+            ctx.fillRect(0, 0, 800, 800);
+
+            // Mix of bee-game emojis for the preview
+            const emojis = ['🌸', '🐝', '🌻', '🍯', '🌼', '🐝', '🌺', '✨', '🌸', '🐝'];
+            const sizes = [90, 110, 130, 100, 120];
+            const positions = [];
+            let attempts = 0;
+
+            while (positions.length < 22 && attempts < 1200) {
+                attempts++;
+                const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+                const size = sizes[Math.floor(Math.random() * sizes.length)];
+                const x = Math.random() * (800 - size) + size / 2;
+                const y = Math.random() * (800 - size) + size / 2;
+                const radius = size / 2;
+
+                let overlaps = false;
+                for (let pos of positions) {
+                    const dx = x - pos.x;
+                    const dy = y - pos.y;
+                    if (Math.sqrt(dx * dx + dy * dy) < radius + pos.radius + 40) {
+                        overlaps = true;
+                        break;
+                    }
+                }
+
+                if (!overlaps) {
+                    positions.push({ x, y, radius });
+                    ctx.save();
+                    ctx.globalAlpha = 0.75 + Math.random() * 0.25;
+                    ctx.translate(x, y);
+                    ctx.rotate(Math.random() * Math.PI * 2);
+                    ctx.font = `${size}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(emoji, 0, 0);
+                    ctx.restore();
+                }
+            }
+            return canvas.toDataURL();
+        }
+
         // Wait for DOM to be fully loaded
         document.addEventListener('DOMContentLoaded', function() {
-            restartBtn.addEventListener('click', () => initGame(false));
+            // Add pop + ripple animation to all non-header buttons on press
+            const gameButtons = [
+                document.getElementById('restartBtn'),
+                document.getElementById('difficultyBtn'),
+                document.getElementById('continueBtn'),
+                document.getElementById('giveUpBtn'),
+                document.getElementById('playAgainBtn'),
+                document.getElementById('shareBtn'),
+            ];
+            gameButtons.forEach(btn => {
+                if (!btn) return;
+                // Ensure button has position:relative for ripple positioning
+                btn.style.overflow = 'hidden';
+
+                function triggerPop(e) {
+                    // Pop animation
+                    btn.classList.remove('btn-pop');
+                    void btn.offsetWidth; // force reflow
+                    btn.classList.add('btn-pop');
+                    btn.addEventListener('animationend', () => btn.classList.remove('btn-pop'), { once: true });
+
+                    // Ripple effect
+                    const ripple = document.createElement('span');
+                    ripple.className = 'btn-ripple';
+                    const rect = btn.getBoundingClientRect();
+                    const x = (e.clientX || rect.left + rect.width / 2) - rect.left;
+                    const y = (e.clientY || rect.top + rect.height / 2) - rect.top;
+                    ripple.style.left = x + 'px';
+                    ripple.style.top = y + 'px';
+                    btn.appendChild(ripple);
+                    setTimeout(() => ripple.remove(), 700);
+                }
+
+                btn.addEventListener('mousedown', triggerPop);
+                btn.addEventListener('touchstart', (e) => triggerPop(e.touches[0]), { passive: true });
+            });
+
+            // Show welcome pattern on the game board before game starts
+            const welcomePattern = generateWelcomePattern();
+            gameBoard.style.backgroundImage = `url(${welcomePattern})`;
+            gameBoard.style.backgroundSize = 'cover';
+            gameBoard.style.backgroundPosition = 'center';
+
+            restartBtn.addEventListener('click', () => {
+                // Restore original game board background when game starts
+                gameBoard.style.backgroundImage = '';
+                initGame(false);
+            });
             difficultyBtn.addEventListener('click', cycleDifficulty);
             
             continueBtn.addEventListener('click', () => {
