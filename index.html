@@ -256,17 +256,7 @@
             width: 100%;
             height: 0;
             padding-bottom: 100%; /* Creates square aspect ratio */
-            background: 
-                radial-gradient(circle at 20% 20%, rgba(255, 235, 59, 0.3) 0%, transparent 15%),
-                radial-gradient(ellipse at 30% 70%, rgba(76, 175, 80, 0.4) 0%, transparent 40%),
-                radial-gradient(ellipse at 70% 75%, rgba(139, 195, 74, 0.4) 0%, transparent 35%),
-                linear-gradient(180deg, 
-                    #87CEEB 0%, 
-                    #A9DBE8 25%, 
-                    #7CB342 50%, 
-                    #689F38 65%, 
-                    #558B2F 80%, 
-                    #33691E 100%);
+            background: #ffffff; /* Neutral — welcome pattern and level patterns are set via JS */
             background-size: cover;
             background-position: center;
             border-radius: 10px;
@@ -980,6 +970,50 @@
                 padding: 10px 15px;
             }
         }
+
+        /* ============================================
+           UNITY WEBVIEW AD INTEGRATION - AD BUTTON STYLES
+           ============================================ */
+        .fill-lives-button {
+            background: linear-gradient(135deg, #00b894 0%, #00cec9 100%) !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 18px;
+            padding: 15px 30px !important;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .play-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            font-size: 12px;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -1060,8 +1094,14 @@
 
         <div id="continueScreen" style="display: none;">
             <h2 style="font-size: 48px; color: #f44336; margin-bottom: 40px; font-weight: bold;">Game Over?</h2>
+            <!-- REWARDED AD PLACEMENT: Unity/LevelPlay bridge triggers UnityBridge.showRewardedAd('continueGame') -->
             <div id="adContainer" style="display: none;">
-                <p style="font-size: 32px; font-weight: bold; color: #333; padding: 60px 40px; background: rgba(255, 255, 255, 0.9); border-radius: 15px; margin-bottom: 30px;">Rewarded Ad</p>
+                <div style="background: rgba(255, 255, 255, 0.9); border-radius: 15px; padding: 40px; margin-bottom: 30px; text-align: center;">
+                    <p style="font-size: 18px; color: #666; margin-bottom: 20px;">Watch a short video to continue playing!</p>
+                    <button class="fill-lives-button" onclick="continueWithRewardedAd()">
+                        <span class="play-icon">▶</span> WATCH AD TO CONTINUE
+                    </button>
+                </div>
             </div>
             <div id="continueButtons" class="game-over-buttons">
                 <button id="continueBtn">Continue</button>
@@ -1070,8 +1110,14 @@
         </div>
 
         <div id="interstitialAdScreen" style="display: none;">
+            <!-- INTERSTITIAL AD PLACEMENT: Unity/LevelPlay bridge triggers UnityBridge.showInterstitialAd(placement) -->
+            <!-- Placement values: 'levelComplete', 'gameOver', 'menuReturn' -->
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
-                <p style="font-size: 36px; font-weight: bold; color: #333; padding: 80px 60px; background: rgba(255, 255, 255, 0.95); border-radius: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);">Interstitial Ad</p>
+                <div style="background: rgba(255, 255, 255, 0.95); border-radius: 20px; padding: 60px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); text-align: center;">
+                    <div style="font-size: 48px; margin-bottom: 10px;">📺</div>
+                    <p style="font-size: 20px; font-weight: bold; color: #333;">Ad Loading...</p>
+                    <div class="loading-spinner" style="margin: 15px auto 0;"></div>
+                </div>
             </div>
         </div>
 
@@ -1107,6 +1153,155 @@
     </div>
 
     <script>
+        // ============================================
+        // UNITY WEBVIEW BRIDGE - AD INTEGRATION
+        // LibertyPixel Standard v1.0
+        // Developer note: Unity side should call window.onRewardedAdCompleted()
+        // and window.onInterstitialAdClosed() as callbacks after ads complete.
+        // ============================================
+
+        const UnityBridge = {
+            isUnityWebView: function() {
+                return typeof Unity !== 'undefined' ||
+                       window.webkit?.messageHandlers?.unity ||
+                       window.UniWebView;
+            },
+
+            sendToUnity: function(action, data = {}) {
+                let params = new URLSearchParams(data).toString();
+                let url = `uniwebview://${action}?${params}`;
+
+                if (window.UniWebView) {
+                    window.location.href = url;
+                    return;
+                }
+
+                if (window.webkit?.messageHandlers?.unity) {
+                    const message = JSON.stringify({ action, data });
+                    window.webkit.messageHandlers.unity.postMessage(message);
+                    return;
+                }
+
+                if (window.Unity) {
+                    const message = JSON.stringify({ action, data });
+                    window.Unity.postMessage(message);
+                    return;
+                }
+
+                // Browser fallback - simulate ads for testing
+                console.log('[UnityBridge] Message to Unity:', action, data);
+
+                if (action === 'showRewardedAd') {
+                    console.log('[UnityBridge] Simulating rewarded ad...');
+                    setTimeout(() => {
+                        onRewardedAdCompleted(data.rewardType, true);
+                    }, 2000);
+                }
+                if (action === 'showInterstitialAd') {
+                    console.log('[UnityBridge] Simulating interstitial ad...');
+                    setTimeout(() => {
+                        onInterstitialAdClosed(data.placement);
+                    }, 1000);
+                }
+            },
+
+            showRewardedAd: function(rewardType) {
+                console.log('[UnityBridge] Requesting rewarded ad for:', rewardType);
+                this.sendToUnity('showRewardedAd', { rewardType: rewardType });
+            },
+
+            showInterstitialAd: function(placement) {
+                console.log('[UnityBridge] Requesting interstitial ad:', placement);
+                this.sendToUnity('showInterstitialAd', { placement: placement });
+            }
+        };
+
+        // --- Callbacks called BY Unity after ad events ---
+
+        function onRewardedAdCompleted(rewardType, success) {
+            console.log('[UnityBridge] Rewarded ad completed:', rewardType, success);
+            if (success) {
+                switch(rewardType) {
+                    case 'continueGame':
+                        continueGameReward();
+                        break;
+                    default:
+                        console.log('[UnityBridge] Unknown reward type:', rewardType);
+                }
+            } else {
+                onAdFailed(rewardType);
+            }
+        }
+
+        function onInterstitialAdClosed(placement) {
+            console.log('[UnityBridge] Interstitial ad closed, placement:', placement);
+            // The callback stored in _interstitialCallback is invoked to resume game flow
+            if (window._interstitialCallback) {
+                const cb = window._interstitialCallback;
+                window._interstitialCallback = null;
+                cb();
+            }
+        }
+
+        function onAdFailed(adType) {
+            console.log('[UnityBridge] Ad failed:', adType);
+            resetAdButton();
+        }
+
+        // --- Rewarded Ad: Continue Game ---
+
+        function continueWithRewardedAd() {
+            const btn = document.querySelector('.fill-lives-button');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<span class="loading-spinner"></span> LOADING AD...';
+            btn.disabled = true;
+            window._adBtnOriginal = { btn, originalHTML };
+            UnityBridge.showRewardedAd('continueGame');
+        }
+
+        function continueGameReward() {
+            resetAdButton();
+            // Hide the ad container and continue screen; restore continue buttons for next fail
+            const adContainerEl = document.getElementById('adContainer');
+            const continueScreenEl = document.getElementById('continueScreen');
+            const continueButtonsEl = document.getElementById('continueButtons');
+            if (adContainerEl) adContainerEl.style.display = 'none';
+            if (continueScreenEl) continueScreenEl.style.display = 'none';
+            if (continueButtonsEl) continueButtonsEl.style.display = 'flex';
+            playerLives = 3;
+            retryLevel();
+
+            // Show Queen Bee reward message if just granted
+            if (queenBeeRewardActive && !queenBeeUsed) {
+                setTimeout(() => {
+                    queenBeeRewardMessageEl.style.display = 'block';
+                    queenBeeRewardMessageEl.textContent = 'You got Queen Bee reward! Press 👑 to get help!';
+                    queenBeeBtn.style.display = 'inline-flex';
+                    queenBeeBtn.classList.add('blink');
+                    playQueenBeeRewardSound();
+                    setTimeout(() => {
+                        queenBeeRewardMessageEl.style.display = 'none';
+                        queenBeeRewardMessageEl.textContent = '';
+                        queenBeeBtn.classList.remove('blink');
+                    }, 3000);
+                }, 500);
+            }
+
+            setTimeout(() => { playBackgroundMusic(); }, 100);
+        }
+
+        function resetAdButton() {
+            if (window._adBtnOriginal) {
+                window._adBtnOriginal.btn.innerHTML = window._adBtnOriginal.originalHTML;
+                window._adBtnOriginal.btn.disabled = false;
+                window._adBtnOriginal = null;
+            }
+        }
+
+        // ============================================
+        // END UNITY WEBVIEW BRIDGE
+        // ============================================
+
         const DIFFICULTIES = {
             'Easy': { grid: 4, speed: 1.5 },
             'Medium': { grid: 5, speed: 2.5 },
@@ -2946,14 +3141,18 @@
         }
 
         function showInterstitialAd(callback) {
-            // Show interstitial ad screen
+            // INTERSTITIAL AD PLACEMENT: 'levelComplete'
+            // Show the interstitial screen and request ad from Unity/LevelPlay.
+            // Unity side must call window.onInterstitialAdClosed('levelComplete') when the ad closes.
             interstitialAdScreen.style.display = 'flex';
-            
-            // Hide after 5 seconds and call callback
-            setTimeout(() => {
+
+            // Store callback so onInterstitialAdClosed() can resume game flow
+            window._interstitialCallback = function() {
                 interstitialAdScreen.style.display = 'none';
                 if (callback) callback();
-            }, 5000);
+            };
+
+            UnityBridge.showInterstitialAd('levelComplete');
         }
 
         // Generate a welcome pattern for the start screen
@@ -3117,56 +3316,18 @@
                     lastFailedLevel = currentLevel;
                 }
                 
-                // Grant Queen Bee reward every time on 5th continue (resets each time)
+                // Grant Queen Bee reward on 5th continue (resets each time)
                 if (continueCountOnLevel === 5) {
                     queenBeeRewardActive = true;
                     queenBeeUsed = false;
-                    continueCountOnLevel = 0; // Reset so they can earn it again
+                    continueCountOnLevel = 0;
                 }
                 
-                // Hide buttons and show ad
+                // Hide continue action buttons and reveal the rewarded ad UI
+                // The ad button calls continueWithRewardedAd() -> UnityBridge.showRewardedAd('continueGame')
+                // Unity calls back onRewardedAdCompleted('continueGame', true) -> continueGameReward()
                 continueButtons.style.display = 'none';
                 adContainer.style.display = 'block';
-                
-                // Show ad for 5 seconds
-                setTimeout(() => {
-                    // Hide continue screen
-                    continueScreen.style.display = 'none';
-                    adContainer.style.display = 'none';
-                    continueButtons.style.display = 'flex';
-                    
-                    // Restart at same level with 3 new lives
-                    playerLives = 3;
-                    retryLevel();
-                    
-                    // Show Queen Bee reward message if just granted
-                    if (queenBeeRewardActive && !queenBeeUsed) {
-                        setTimeout(() => {
-                            queenBeeRewardMessageEl.style.display = 'block';
-                            queenBeeRewardMessageEl.textContent = 'You got Queen Bee reward! Press 👑 to get help!';
-                            queenBeeBtn.style.display = 'inline-flex';
-                            
-                            // Add blink animation to button
-                            queenBeeBtn.classList.add('blink');
-                            
-                            // Play cute reward sound
-                            playQueenBeeRewardSound();
-                            
-                            setTimeout(() => {
-                                queenBeeRewardMessageEl.style.display = 'none';
-                                queenBeeRewardMessageEl.textContent = '';
-                                
-                                // Remove blink animation when message disappears
-                                queenBeeBtn.classList.remove('blink');
-                            }, 3000);
-                        }, 500);
-                    }
-                    
-                    // Start music after level setup
-                    setTimeout(() => {
-                        playBackgroundMusic();
-                    }, 100);
-                }, 5000);
             });
             
             giveUpBtn.addEventListener('click', () => {
