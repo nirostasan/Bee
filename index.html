@@ -332,9 +332,11 @@
             -webkit-focus-ring-color: transparent;
         }
 
-        .tile:hover {
-            background: rgba(255, 255, 255, 0.75);
-            transform: scale(0.98);
+        @media (hover: hover) and (pointer: fine) {
+            .tile:hover {
+                background: rgba(255, 255, 255, 0.75);
+                transform: scale(0.98);
+            }
         }
 
         .tile.filled {
@@ -1610,7 +1612,7 @@
                 tile.dataset.index = i;
                 tile.setAttribute('tabindex', '-1');
                 tile.addEventListener('click', handleTileClick);
-                tile.addEventListener('touchstart', handleTileClick, { passive: false });
+                tile.addEventListener('touchstart', handleTileClick, { passive: true });
                 tile.addEventListener('mouseenter', handleTileEnter);
                 tile.addEventListener('mousedown', handleMouseDown);
                 inner.appendChild(tile);
@@ -1770,7 +1772,7 @@
                 tile.dataset.index = i;
                 tile.setAttribute('tabindex', '-1');
                 tile.addEventListener('click', handleTileClick);
-                tile.addEventListener('touchstart', handleTileClick, { passive: false });
+                tile.addEventListener('touchstart', handleTileClick, { passive: true });
                 tile.addEventListener('mouseenter', handleTileEnter);
                 tile.addEventListener('mousedown', handleMouseDown);
                 inner.appendChild(tile);
@@ -3005,24 +3007,50 @@
             }
         }
 
+        function isEmojiRendered(ctx, x, y, size) {
+            // Draw a test emoji and check if any non-transparent colored pixels exist
+            ctx.clearRect(x - size, y - size, size * 2, size * 2);
+            ctx.font = size + 'px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🐝', x, y);
+            const data = ctx.getImageData(x - size/2, y - size/2, size, size).data;
+            // Look for colored (non-grey, non-transparent) pixels indicating real emoji color rendering
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3];
+                if (a > 50 && !(r === g && g === b)) return true; // colored pixel = emoji loaded
+            }
+            return false;
+        }
+
         function generateWelcomePattern() {
             return new Promise((resolve) => {
                 const canvas = document.createElement('canvas');
                 canvas.width = 800;
                 canvas.height = 800;
-                // Attach hidden to DOM so iOS loads the emoji color font
-                canvas.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;pointer-events:none;';
+                // Must be visible in DOM for iOS to load the emoji color font
+                canvas.style.cssText = 'position:fixed;top:-9999px;left:-9999px;pointer-events:none;';
                 document.body.appendChild(canvas);
+                const ctx = canvas.getContext('2d');
 
-                // Wait two frames so iOS has time to load the emoji font
-                requestAnimationFrame(() => {
-                    requestAnimationFrame(() => {
+                let attempts = 0;
+                const maxAttempts = 30;
+
+                function tryDraw() {
+                    attempts++;
+                    if (isEmojiRendered(ctx, 400, 400, 60) || attempts >= maxAttempts) {
+                        // Emoji font is loaded — draw the full pattern
                         drawWelcomePattern(canvas);
                         const dataUrl = canvas.toDataURL();
                         document.body.removeChild(canvas);
                         resolve(dataUrl);
-                    });
-                });
+                    } else {
+                        // Not ready yet — wait another frame and retry
+                        requestAnimationFrame(tryDraw);
+                    }
+                }
+
+                requestAnimationFrame(tryDraw);
             });
         }
 
