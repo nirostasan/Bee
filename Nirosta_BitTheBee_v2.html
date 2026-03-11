@@ -1014,6 +1014,14 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
+        #copyright {
+            text-align: center;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.55);
+            margin-top: 10px;
+            letter-spacing: 0.03em;
+        }
     </style>
 </head>
 <body>
@@ -1150,6 +1158,8 @@
                 <button id="shareBtn">Share Score</button>
             </div>
         </div>
+
+        <p id="copyright">&copy; <span id="copyrightYear"></span> Nirosta Games LLC. All rights reserved.</p>
     </div>
 
     <script>
@@ -3451,6 +3461,8 @@
             link.rel = 'shortcut icon';
             link.href = canvas.toDataURL();
             document.getElementsByTagName('head')[0].appendChild(link);
+
+            document.getElementById('copyrightYear').textContent = new Date().getFullYear();
         });
     </script>
 </body>
