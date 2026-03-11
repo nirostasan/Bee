@@ -1,0 +1,3296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bit the Bee</title>
+    <link rel="shortcut icon" href="#">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 15% 25%, rgba(255, 255, 255, 0.4) 0%, transparent 10%),
+                radial-gradient(circle at 35% 20%, rgba(255, 255, 255, 0.3) 0%, transparent 12%),
+                radial-gradient(circle at 65% 18%, rgba(255, 255, 255, 0.35) 0%, transparent 15%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        #gameContainer {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+            z-index: 1;
+        }
+
+        #header {
+            margin-bottom: 5px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&display=swap');
+
+        #gameTitle {
+            margin: 0;
+            position: relative;
+            display: inline-block;
+            animation: titleWiggle 3s ease-in-out infinite;
+            filter: drop-shadow(0 4px 0 #c9720a) drop-shadow(0 5px 10px rgba(255,154,60,0.4));
+        }
+
+        #gameTitle svg {
+            display: block;
+        }
+
+        #gameTitle .title-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Zen Maru Gothic', 'Arial Rounded MT Bold', sans-serif;
+            font-size: 17px;
+            font-weight: 900;
+            white-space: nowrap;
+            color: #fff;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            letter-spacing: 0.04em;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        #gameTitle .bee-icon {
+            font-size: 16px;
+            animation: beeBounce 1.5s ease-in-out infinite;
+            display: inline-block;
+        }
+
+        h1 {
+            margin: 0;
+            padding: 0;
+            display: contents;
+        }
+
+        @keyframes titleWiggle {
+            0%, 100% { transform: rotate(-1deg); }
+            50% { transform: rotate(1deg); }
+        }
+
+        @keyframes beeBounce {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-3px); }
+        }
+
+        h1 img {
+            height: 40px;
+            width: auto;
+            display: block;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+        }
+
+        #stats {
+            display: flex;
+            gap: 8px;
+            font-size: 16px;
+            color: #666;
+            flex-wrap: nowrap;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-shrink: 0;
+        }
+
+        #levelStat {
+            font-size: 28px;
+            font-weight: bold;
+            padding-left: 6px;
+            color: #000000;
+        }
+
+        .sound-btn {
+            background: transparent;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 3px;
+            transition: transform 0.2s;
+        }
+
+        .sound-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .sound-btn:active {
+            transform: scale(0.9);
+        }
+
+        .queen-bee-btn:hover {
+            transform: scale(1.2);
+        }
+
+        .queen-bee-btn:active {
+            transform: scale(0.9);
+        }
+        
+        .queen-bee-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            width: 28px;
+            height: 28px;
+            min-width: 28px;
+            background: transparent;
+            border: none;
+        }
+        
+        .queen-bee-btn.blink {
+            animation: queenBeeBlink 0.5s ease-in-out infinite;
+        }
+        
+        @keyframes queenBeeBlink {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.3;
+                transform: scale(1.1);
+            }
+        }
+
+        .heart-with-number {
+            position: relative;
+            display: inline-block;
+            font-size: 28px;
+        }
+
+        .heart-bg {
+            position: relative;
+            z-index: 1;
+        }
+
+        .lives-number {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .tile-icon {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            background: #4CAF50;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .tile-with-number {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tiles-number {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+            pointer-events: none;
+        }
+
+        #gameBoard {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 100%; /* Creates square aspect ratio */
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(255, 235, 59, 0.3) 0%, transparent 15%),
+                radial-gradient(ellipse at 30% 70%, rgba(76, 175, 80, 0.4) 0%, transparent 40%),
+                radial-gradient(ellipse at 70% 75%, rgba(139, 195, 74, 0.4) 0%, transparent 35%),
+                linear-gradient(180deg, 
+                    #87CEEB 0%, 
+                    #A9DBE8 25%, 
+                    #7CB342 50%, 
+                    #689F38 65%, 
+                    #558B2F 80%, 
+                    #33691E 100%);
+            background-size: cover;
+            background-position: center;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.2);
+            touch-action: none;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-user-drag: none;
+            -khtml-user-drag: none;
+            -moz-user-drag: none;
+            -o-user-drag: none;
+        }
+
+        #gameBoardInner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: grid;
+            gap: 0px;
+            padding: 0px;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+        }
+
+        #gameBoard::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(255, 255, 200, 0.3) 0%, transparent 15%),
+                radial-gradient(ellipse at 30% 70%, rgba(76, 175, 80, 0.3) 0%, transparent 40%),
+                radial-gradient(ellipse at 70% 75%, rgba(139, 195, 74, 0.3) 0%, transparent 35%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .tile {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(8px);
+            border-radius: 0px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            border: none;
+            z-index: 2;
+            touch-action: none;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-drag: none;
+            -khtml-user-drag: none;
+            -moz-user-drag: none;
+            -o-user-drag: none;
+            user-select: none;
+            -webkit-user-select: none;
+            outline: none;
+            -webkit-focus-ring-color: transparent;
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            .tile:hover {
+                background: rgba(255, 255, 255, 0.75);
+                transform: scale(0.98);
+            }
+        }
+
+        .tile.filled {
+            background-repeat: no-repeat;
+            background-color: transparent !important;
+            backdrop-filter: none !important;
+            cursor: default;
+            box-shadow: none;
+            border: none;
+            outline: none;
+            transition: none !important;
+            transform: none !important;
+        }
+
+        .tile.filled:hover {
+            transform: none !important;
+        }
+
+        .bee {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            pointer-events: none;
+            z-index: 10;
+            transform-origin: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
+        /* Left wing */
+        .bee::before {
+            content: '';
+            position: absolute;
+            width: 14px;
+            height: 18px;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.9) 0%, 
+                rgba(230, 240, 255, 0.7) 50%,
+                rgba(200, 220, 255, 0.5) 100%);
+            border-radius: 50% 50% 30% 70%;
+            top: 5px;
+            left: 0px;
+            animation: wingBeatLeft 0.08s linear infinite;
+            transform-origin: bottom center;
+            border: 0.5px solid rgba(180, 200, 230, 0.6);
+            box-shadow: 0 0 3px rgba(255, 255, 255, 0.5);
+        }
+
+        /* Right wing */
+        .bee::after {
+            content: '';
+            position: absolute;
+            width: 14px;
+            height: 18px;
+            background: linear-gradient(225deg, 
+                rgba(255, 255, 255, 0.9) 0%, 
+                rgba(230, 240, 255, 0.7) 50%,
+                rgba(200, 220, 255, 0.5) 100%);
+            border-radius: 50% 50% 70% 30%;
+            top: 5px;
+            right: 0px;
+            animation: wingBeatRight 0.08s linear infinite;
+            transform-origin: bottom center;
+            border: 0.5px solid rgba(180, 200, 230, 0.6);
+            box-shadow: 0 0 3px rgba(255, 255, 255, 0.5);
+        }
+
+        @keyframes wingBeatLeft {
+            0% {
+                transform: translateY(0) rotateZ(-10deg);
+                opacity: 0.9;
+            }
+            25% {
+                transform: translateY(-4px) rotateZ(-35deg);
+                opacity: 0.7;
+            }
+            50% {
+                transform: translateY(-6px) rotateZ(-45deg);
+                opacity: 0.5;
+            }
+            75% {
+                transform: translateY(-4px) rotateZ(-35deg);
+                opacity: 0.7;
+            }
+            100% {
+                transform: translateY(0) rotateZ(-10deg);
+                opacity: 0.9;
+            }
+        }
+
+        @keyframes wingBeatRight {
+            0% {
+                transform: translateY(0) rotateZ(10deg);
+                opacity: 0.9;
+            }
+            25% {
+                transform: translateY(-4px) rotateZ(35deg);
+                opacity: 0.7;
+            }
+            50% {
+                transform: translateY(-6px) rotateZ(45deg);
+                opacity: 0.5;
+            }
+            75% {
+                transform: translateY(-4px) rotateZ(35deg);
+                opacity: 0.7;
+            }
+            100% {
+                transform: translateY(0) rotateZ(10deg);
+                opacity: 0.9;
+            }
+        }
+
+        #controls {
+            display: flex; /* Visible at start and game over */
+            gap: 10px;
+            flex-wrap: wrap;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+            justify-content: center;
+        }
+
+        #controls.hide {
+            display: none; /* Hidden during active gameplay */
+        }
+
+        button {
+            flex: 0 0 auto;
+            display: inline-block;
+            width: auto;
+            min-width: unset;
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Zen Maru Gothic', 'Arial Rounded MT Bold', sans-serif;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            white-space: nowrap;
+        }
+        #restartBtn {
+            background: linear-gradient(135deg, #FFD93D 0%, #FF9A3C 100%);
+            color: #fff;
+            padding: 18px 36px;
+            font-size: 22px;
+            border-radius: 50px;
+            box-shadow: 0 5px 0 #c9720a, 0 8px 20px rgba(255, 154, 60, 0.45);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+        }
+
+        #restartBtn:hover {
+            transform: translateY(-3px) scale(1.04);
+            box-shadow: 0 8px 0 #c9720a, 0 12px 28px rgba(255, 154, 60, 0.5);
+        }
+
+        #difficultyBtn {
+            background: linear-gradient(135deg, #e8e8e8 0%, #d0d0d0 100%);
+            color: #555;
+            box-shadow: 0 4px 0 #aaa, 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        #difficultyBtn:hover {
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 6px 0 #aaa, 0 8px 16px rgba(0,0,0,0.15);
+        }
+
+        @keyframes btnPop {
+            0%   { transform: scale(1) translateY(0); }
+            25%  { transform: scale(0.93) translateY(3px); }
+            65%  { transform: scale(1.05) translateY(-2px); }
+            100% { transform: scale(1) translateY(0); }
+        }
+
+        @keyframes btnRipple {
+            0%   { transform: scale(0); opacity: 0.35; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+
+        .btn-pop {
+            animation: btnPop 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards !important;
+            transition: none !important;
+        }
+
+        .btn-ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            width: 50px;
+            height: 50px;
+            margin-top: -25px;
+            margin-left: -25px;
+            pointer-events: none;
+            animation: btnRipple 0.4s ease-out forwards;
+        }
+
+        #gameOverScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            /* Fallback for browsers without backdrop-filter */
+            background: rgba(255, 255, 255, 0.85);
+            /* Modern glassmorphism effect */
+            backdrop-filter: blur(12px) saturate(180%);
+            -webkit-backdrop-filter: blur(12px) saturate(180%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Make title semi-transparent too */
+        #gameOverScreen h2 {
+            font-size: 48px;
+            color: #f44336;
+            margin-bottom: 40px;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 10px 30px;
+            border-radius: 15px;
+        }
+
+        .game-over-stats {
+            width: 100%;
+            max-width: 400px;
+            margin-bottom: 40px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            margin-bottom: 15px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            font-size: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            font-size: 28px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #newHighScore {
+            font-size: 16px;
+            color: #4CAF50;
+            animation: celebrate 0.6s ease infinite;
+        }
+
+        .game-over-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .game-over-buttons button {
+            min-width: 150px;
+            padding: 15px 30px;
+            font-size: 18px;
+        }
+
+        #playAgainBtn {
+            background: linear-gradient(135deg, #FFD93D 0%, #FF9A3C 100%);
+            color: #fff;
+            box-shadow: 0 4px 0 #c9720a, 0 6px 16px rgba(255, 154, 60, 0.4);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+        }
+
+        #playAgainBtn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 7px 0 #c9720a, 0 10px 22px rgba(255, 154, 60, 0.5);
+        }
+
+        #shareBtn {
+            background: linear-gradient(135deg, #FF9EBC 0%, #FF6B9D 100%);
+            color: #fff;
+            box-shadow: 0 4px 0 #c94472, 0 6px 16px rgba(255, 107, 157, 0.4);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+        }
+
+        #shareBtn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 7px 0 #c94472, 0 10px 22px rgba(255, 107, 157, 0.5);
+        }
+
+        #continueScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px) saturate(180%);
+            -webkit-backdrop-filter: blur(12px) saturate(180%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        #continueBtn {
+            background: linear-gradient(135deg, #A8E6A3 0%, #56C759 100%);
+            color: #fff;
+            padding: 15px 30px;
+            font-size: 18px;
+            box-shadow: 0 4px 0 #2e8b34, 0 6px 16px rgba(86, 199, 89, 0.4);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+        }
+
+        #continueBtn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 7px 0 #2e8b34, 0 10px 22px rgba(86, 199, 89, 0.5);
+        }
+
+        #giveUpBtn {
+            background: linear-gradient(135deg, #FFB3B3 0%, #FF6B6B 100%);
+            color: #fff;
+            padding: 15px 30px;
+            font-size: 18px;
+            box-shadow: 0 4px 0 #c43a3a, 0 6px 16px rgba(255, 107, 107, 0.4);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+        }
+
+        #giveUpBtn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 7px 0 #c43a3a, 0 10px 22px rgba(255, 107, 107, 0.5);
+        }
+
+        #interstitialAdScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 250;
+            border-radius: 20px;
+            padding: 40px;
+        }
+
+        @keyframes wordDrop {
+            0%   { transform: translateY(-40px) scale(0.5); opacity: 0; }
+            55%  { transform: translateY(6px) scale(1.15); opacity: 1; }
+            75%  { transform: translateY(-4px) scale(0.95); }
+            90%  { transform: translateY(2px) scale(1.02); }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        @keyframes floatUp {
+            0%   { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-90px) scale(0.4) rotate(var(--rot)); opacity: 0; }
+        }
+
+        #message {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 900;
+            font-family: 'Zen Maru Gothic', 'Arial Rounded MT Bold', sans-serif;
+            min-height: 60px;
+            margin-top: 15px;
+            padding: 0 4px;
+            visibility: hidden;
+            white-space: normal;
+            line-height: 1.4;
+            width: 100%;
+            box-sizing: border-box;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            position: relative;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #message.visible {
+            visibility: visible;
+        }
+
+        #message .msg-word {
+            display: inline-block;
+            margin: 0 3px;
+            opacity: 0;
+            animation: wordDrop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .msg-emoji-particle {
+            position: fixed;
+            font-size: 22px;
+            pointer-events: none;
+            z-index: 9999;
+            animation: floatUp 1.1s ease-out forwards;
+        }
+        
+        #message.overlay {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 8px 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            white-space: nowrap;
+            margin-top: 0;
+        }
+        
+        #queenBeeRewardMessage {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            display: none;
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 8px 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            white-space: nowrap;
+            color: #4CAF50;
+        }
+
+        .win {
+            color: #4CAF50;
+            animation: celebrate 0.5s ease;
+        }
+
+        @keyframes beeDeliveryIn {
+            0%   { right: -120%; opacity: 1; }
+            70%  { right: 12px; }
+            85%  { right: 26px; }
+            100% { right: 20px; }
+        }
+
+        @keyframes beeDeliveryOut {
+            0%   { right: 20px; opacity: 1; }
+            100% { right: 110%; opacity: 0.7; }
+        }
+
+        @keyframes beeBodyBob {
+            0%, 100% { transform: translateY(0px) rotate(-5deg); }
+            50%       { transform: translateY(-5px) rotate(5deg); }
+        }
+
+        @keyframes beeWingFlap {
+            0%, 100% { transform: scaleY(1) rotate(-20deg); }
+            50%       { transform: scaleY(0.3) rotate(-20deg); }
+        }
+
+        #beeDelivery {
+            position: absolute;
+            top: 45%;
+            right: 20px;
+            transform: translateX(120%);
+            z-index: 300;
+            display: flex;
+            align-items: center;
+            gap: 0;
+            pointer-events: none;
+            max-width: 85%;
+        }
+
+        #beeDelivery.fly-in {
+            animation: beeDeliveryIn 0.9s cubic-bezier(0.34, 1.3, 0.64, 1) forwards;
+        }
+
+        #beeDelivery.fly-out {
+            animation: beeDeliveryOut 0.8s ease-in forwards;
+        }
+
+        #beeDelivery .delivery-bee {
+            font-size: 28px;
+            display: inline-block;
+            animation: beeBodyBob 0.4s ease-in-out infinite;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+            z-index: 2;
+        }
+
+        #beeDelivery .delivery-string {
+            width: 18px;
+            height: 2px;
+            background: repeating-linear-gradient(90deg, #c9720a 0px, #c9720a 4px, transparent 4px, transparent 7px);
+            align-self: center;
+            margin-top: -4px;
+        }
+
+        #beeDelivery .delivery-banner {
+            background: linear-gradient(135deg, #FFF8DC, #FFE066);
+            border: 2px solid #c9720a;
+            border-radius: 10px;
+            padding: 8px 14px;
+            font-family: 'Zen Maru Gothic', 'Arial Rounded MT Bold', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: #8B4513;
+            white-space: nowrap;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15), 0 1px 0 rgba(255,255,255,0.8) inset;
+            max-width: 240px;
+            white-space: normal;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        .lose {
+            color: #8B4513;
+            background: linear-gradient(135deg, #FFF8DC, #FFE066);
+            border: 2px solid #c9720a;
+            border-radius: 50px;
+            padding: 8px 20px;
+            font-family: 'Zen Maru Gothic', 'Arial Rounded MT Bold', sans-serif;
+            font-size: 15px;
+            box-shadow: 0 3px 0 #c9720a, 0 5px 12px rgba(201,114,10,0.25);
+            position: absolute;
+            white-space: nowrap;
+            animation: cuteWiggle 0.6s ease forwards, nervousShimmy 0.5s ease 0.6s infinite;
+        }
+
+        @keyframes cuteWiggle {
+            0%   { transform: scale(0.5) rotate(0deg); opacity: 0; }
+            40%  { transform: scale(1.15) rotate(-4deg); opacity: 1; }
+            60%  { transform: scale(0.95) rotate(3deg); }
+            80%  { transform: scale(1.05) rotate(-2deg); }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        @keyframes nervousShimmy {
+            0%   { transform: rotate(0deg) translateX(0); }
+            20%  { transform: rotate(-2deg) translateX(-3px); }
+            40%  { transform: rotate(2deg) translateX(3px); }
+            60%  { transform: rotate(-1.5deg) translateX(-2px); }
+            80%  { transform: rotate(1.5deg) translateX(2px); }
+            100% { transform: rotate(0deg) translateX(0); }
+        }
+
+        @keyframes celebrate {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        @keyframes tileShine {
+            0% {
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                filter: brightness(1);
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.6);
+                filter: brightness(1.5);
+            }
+            100% {
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                filter: brightness(1);
+            }
+        }
+
+        @keyframes bounce {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-10px); }
+        }
+
+        .tile.victory-shine {
+            animation: tileShine 0.6s ease-in-out infinite;
+        }
+
+        .bee-dead {
+            animation: fall 0.5s ease forwards;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(500px) rotate(180deg);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 400px) {
+            h1 {
+                font-size: 22px;
+            }
+            h1::before {
+                left: -30px;
+                font-size: 20px;
+            }
+            h1::after {
+                right: -26px;
+                font-size: 18px;
+            }
+            #stats {
+                font-size: 14px;
+            }
+            button {
+                font-size: 14px;
+                padding: 10px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="header">
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: nowrap; gap: 5px; box-sizing: border-box;">
+                <div style="display: flex; flex-direction: column; align-items: flex-start; flex-shrink: 1; min-width: 0;">
+                    <div id="gameTitle" style="margin-left: -14px; margin-top: 8px;">
+                        <!-- 3 tiled flat-top hexagons side by side. Each hex: width=58, height=50, pointy-side left/right -->
+                        <!-- Using pointy-top hex: w=52, h=60, offset rows -->
+                        <svg width="174" height="54" viewBox="0 0 174 54" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Flat-top hexagons: points at left/right. w=58, h=50, centered at y=27 -->
+                            <!-- hex 1: cx=29 -->
+                            <polygon points="14,27 21.5,13 36.5,13 44,27 36.5,41 21.5,41" fill="#FFD93D" stroke="none"/>
+                            <!-- hex 2: cx=87 (adjacent, shares edge) -->
+                            <polygon points="72,27 79.5,13 94.5,13 102,27 94.5,41 79.5,41" fill="#FFD93D" stroke="none"/>
+                            <!-- hex 3: cx=145 -->
+                            <polygon points="130,27 137.5,13 152.5,13 160,27 152.5,41 137.5,41" fill="#FFD93D" stroke="none"/>
+                            <!-- connecting fill between hex 1 and 2 -->
+                            <polygon points="44,27 36.5,13 79.5,13 72,27 79.5,41 36.5,41" fill="#FFD93D" stroke="none"/>
+                            <!-- connecting fill between hex 2 and 3 -->
+                            <polygon points="102,27 94.5,13 137.5,13 130,27 137.5,41 94.5,41" fill="#FFD93D" stroke="none"/>
+                        </svg>
+                        <div class="title-text">
+                            <span class="bee-icon">🐝</span>
+                            <span>Bit the Bee</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px; margin-top: 2px;">
+                        <div id="bestScore" style="font-size: 11px; color: #999; white-space: nowrap;">Best: Level 1</div>
+                        <button id="soundToggleBtn" class="sound-btn" style="margin: 0; padding: 2px; font-size: 14px; line-height: 1;">🎵</button>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; flex-shrink: 0;">
+                    <div id="stats" style="display: flex; margin: 0; gap: 4px; align-items: center; flex-shrink: 0;">
+                        <button id="queenBeeBtn" class="queen-bee-btn" style="display: none; margin: 0; padding: 0; border: none; font-size: 22px; cursor: pointer; transition: all 0.2s;">👑</button>
+                        <div class="stat" id="livesStat">
+                            <span class="heart-with-number">
+                                <span class="heart-bg">❤️</span>
+                                <span class="lives-number" id="lives">3</span>
+                            </span>
+                        </div>
+                        <div class="stat" id="tilesStat">
+                            <span class="tile-with-number">
+                                <span class="tile-icon"></span>
+                                <span class="tiles-number" id="tilesLeft">0</span>
+                            </span>
+                        </div>
+                        <div class="stat" id="levelStat">
+                            <span id="level">1</span>
+                        </div>
+                        <div class="stat" style="display: none;">
+                            <span>🎯</span>
+                            <span id="difficulty">Easy</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="gameBoard">
+        </div>
+
+        <div id="beeDelivery" style="display:none;">
+            <div class="delivery-bee">🐝</div>
+            <div class="delivery-string"></div>
+            <div class="delivery-banner" id="deliveryBannerText"></div>
+        </div>
+
+        <div id="controls">
+            <button id="restartBtn">Start</button>
+            <button id="difficultyBtn" style="display: none;">Change Difficulty</button>
+        </div>
+
+        <div id="message"></div>
+        
+        <div id="queenBeeRewardMessage"></div>
+
+        <div id="continueScreen" style="display: none;">
+            <h2 style="font-size: 48px; color: #f44336; margin-bottom: 40px; font-weight: bold;">Game Over?</h2>
+            <div id="adContainer" style="display: none;">
+                <p style="font-size: 32px; font-weight: bold; color: #333; padding: 60px 40px; background: rgba(255, 255, 255, 0.9); border-radius: 15px; margin-bottom: 30px;">Rewarded Ad</p>
+            </div>
+            <div id="continueButtons" class="game-over-buttons">
+                <button id="continueBtn">Continue</button>
+                <button id="giveUpBtn">Give Up</button>
+            </div>
+        </div>
+
+        <div id="interstitialAdScreen" style="display: none;">
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
+                <p style="font-size: 36px; font-weight: bold; color: #333; padding: 80px 60px; background: rgba(255, 255, 255, 0.95); border-radius: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);">Interstitial Ad</p>
+            </div>
+        </div>
+
+        <div id="tutorialOverlay" style="display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.3); z-index: 250; border-radius: 20px; pointer-events: none;">
+            <div id="tutorialArrow" style="position: absolute; display: none; pointer-events: none; z-index: 300;">
+                <div style="text-align: center; margin-bottom: 10px;">
+                    <div style="font-size: 48px; animation: bounce 0.6s infinite alternate;">👇</div>
+                    <div style="background: rgba(255, 255, 255, 0.95); padding: 12px 20px; border-radius: 12px; font-weight: bold; color: #333; font-size: 18px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); white-space: nowrap;">Click here!</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="gameOverScreen" style="display: none;">
+            <h2>Game Over</h2>
+            <div class="game-over-stats">
+                <div class="stat-row">
+                    <span class="stat-label">Level Reached:</span>
+                    <span class="stat-value" id="finalLevel">1</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Highest Level:</span>
+                    <span class="stat-value">
+                        <span id="highestLevel">1</span>
+                        <span id="newHighScore" style="display: none;">🎉 NEW!</span>
+                    </span>
+                </div>
+            </div>
+            <div class="game-over-buttons">
+                <button id="playAgainBtn">Play Again</button>
+                <button id="shareBtn">Share Score</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const DIFFICULTIES = {
+            'Easy': { grid: 4, speed: 1.5 },
+            'Medium': { grid: 5, speed: 2.5 },
+            'Hard': { grid: 6, speed: 3.5 }
+        };
+
+        // Level themes - each level has a unique emoji and color
+        const LEVEL_THEMES = [
+            { emoji: '🌸', color: '#FFB6C1' }, // Level 1 - Pink flower
+            { emoji: '🌻', color: '#FFD700' }, // Level 2 - Sunflower yellow
+            { emoji: '🌺', color: '#FF69B4' }, // Level 3 - Hibiscus pink
+            { emoji: '🌼', color: '#FFEB3B' }, // Level 4 - Daisy yellow
+            { emoji: '🌷', color: '#FF6B9D' }, // Level 5 - Tulip pink
+            { emoji: '🍓', color: '#FF4444' }, // Level 6 - Strawberry red
+            { emoji: '🍊', color: '#FF8C00' }, // Level 7 - Orange
+            { emoji: '🍋', color: '#FFF44F' }, // Level 8 - Lemon yellow
+            { emoji: '🍉', color: '#FF6B6B' }, // Level 9 - Watermelon red
+            { emoji: '🍇', color: '#9370DB' }, // Level 10 - Grapes purple
+            { emoji: '🍒', color: '#DC143C' }, // Level 11 - Cherry red
+            { emoji: '🍑', color: '#FFDAB9' }, // Level 12 - Peach
+            { emoji: '🥝', color: '#90EE90' }, // Level 13 - Kiwi green
+            { emoji: '🍍', color: '#FFD700' }, // Level 14 - Pineapple yellow
+            { emoji: '🥥', color: '#8B4513' }, // Level 15 - Coconut brown
+            { emoji: '🦋', color: '#87CEEB' }, // Level 16 - Butterfly blue
+            { emoji: '🐠', color: '#4682B4' }, // Level 17 - Fish blue
+            { emoji: '🐙', color: '#FF1493' }, // Level 18 - Octopus pink
+            { emoji: '🦀', color: '#FF6347' }, // Level 19 - Crab red
+            { emoji: '🐚', color: '#F0E68C' }, // Level 20 - Shell khaki
+            { emoji: '🌈', color: '#9370DB' }, // Level 21 - Rainbow purple
+            { emoji: '⭐', color: '#FFD700' }, // Level 22 - Star gold
+            { emoji: '💎', color: '#00CED1' }, // Level 23 - Diamond cyan
+            { emoji: '🎈', color: '#FF69B4' }, // Level 24 - Balloon pink
+            { emoji: '🎨', color: '#FF6347' }, // Level 25 - Palette red
+            { emoji: '🌙', color: '#F0E68C' }, // Level 26 - Moon khaki
+            { emoji: '☀️', color: '#FFA500' }, // Level 27 - Sun orange
+            { emoji: '🌟', color: '#FFD700' }, // Level 28 - Sparkle gold
+            { emoji: '💫', color: '#87CEEB' }, // Level 29 - Dizzy blue
+            { emoji: '✨', color: '#DDA0DD' }, // Level 30 - Sparkles plum
+        ];
+
+        // Function to get level theme (cycles through themes if level > 30)
+        function getLevelTheme(level) {
+            const index = (level - 1) % LEVEL_THEMES.length;
+            return LEVEL_THEMES[index];
+        }
+
+        // Function to calculate background position and size for seamless pattern across entire grid
+        function getTileBackgroundStyle(index, gridSize, tileSize) {
+            const row = Math.floor(index / gridSize);
+            const col = index % gridSize;
+            
+            // Total grid size in pixels
+            const totalGridSize = gridSize * tileSize;
+            
+            // Position this tile's view of the overall pattern
+            const x = -(col * tileSize);
+            const y = -(row * tileSize);
+            
+            return {
+                size: `${totalGridSize}px ${totalGridSize}px`,
+                position: `${x}px ${y}px`
+            };
+        }
+
+        // Function to calculate which borders to show (only outer edges of filled region)
+        function calculateBorders(index, gridSize) {
+            const row = Math.floor(index / gridSize);
+            const col = index % gridSize;
+            
+            const borders = [];
+            
+            // Check top
+            const topIndex = index - gridSize;
+            if (row === 0 || !filledTiles.has(topIndex)) {
+                borders.push('top');
+            }
+            
+            // Check right
+            const rightIndex = index + 1;
+            if (col === gridSize - 1 || !filledTiles.has(rightIndex)) {
+                borders.push('right');
+            }
+            
+            // Check bottom
+            const bottomIndex = index + gridSize;
+            if (row === gridSize - 1 || !filledTiles.has(bottomIndex)) {
+                borders.push('bottom');
+            }
+            
+            // Check left
+            const leftIndex = index - 1;
+            if (col === 0 || !filledTiles.has(leftIndex)) {
+                borders.push('left');
+            }
+            
+            return borders;
+        }
+
+        // Function to apply borders to a tile
+        function applyTileBorders(tile, borders) {
+            const borderWidth = '2px';
+            const borderColor = 'rgba(0, 0, 0, 0.15)';
+            
+            tile.style.borderTop = borders.includes('top') ? `${borderWidth} solid ${borderColor}` : 'none';
+            tile.style.borderRight = borders.includes('right') ? `${borderWidth} solid ${borderColor}` : 'none';
+            tile.style.borderBottom = borders.includes('bottom') ? `${borderWidth} solid ${borderColor}` : 'none';
+            tile.style.borderLeft = borders.includes('left') ? `${borderWidth} solid ${borderColor}` : 'none';
+        }
+
+        // Function to update all filled tile borders
+        function updateAllFilledTileBorders() {
+            tiles.forEach((tile, index) => {
+                if (filledTiles.has(index)) {
+                    const borders = calculateBorders(index, gridSize);
+                    applyTileBorders(tile, borders);
+                }
+            });
+        }
+
+        // Batched border update for smooth dragging
+        function requestBorderUpdate() {
+            if (!borderUpdatePending) {
+                borderUpdatePending = true;
+                requestAnimationFrame(() => {
+                    updateAllFilledTileBorders();
+                    borderUpdatePending = false;
+                });
+            }
+        }
+
+        // Function to generate pattern background for a level
+        function generateLevelPattern(level) {
+            const theme = getLevelTheme(level);
+            const canvas = document.createElement('canvas');
+            canvas.width = 800;
+            canvas.height = 800;
+            const ctx = canvas.getContext('2d');
+            
+            // Fill background with theme color
+            ctx.fillStyle = theme.color + '44'; // Add alpha for transparency
+            ctx.fillRect(0, 0, 800, 800);
+            
+            // Create pattern with much bigger emojis and lots of spacing
+            const emojiSizes = [100, 120, 140, 160]; // Much bigger sizes
+            const positions = []; // Track positions to avoid overlap
+            const numberOfEmojis = 20; // Fewer emojis for much more space
+            
+            // Try to place emojis without overlap
+            let attempts = 0;
+            const maxAttempts = 1000;
+            
+            while (positions.length < numberOfEmojis && attempts < maxAttempts) {
+                attempts++;
+                
+                const size = emojiSizes[Math.floor(Math.random() * emojiSizes.length)];
+                const x = Math.random() * (800 - size) + size / 2;
+                const y = Math.random() * (800 - size) + size / 2;
+                const radius = size / 2;
+                
+                // Check if this position overlaps with existing emojis
+                let overlaps = false;
+                for (let pos of positions) {
+                    const dx = x - pos.x;
+                    const dy = y - pos.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    const minDistance = radius + pos.radius + 60; // 60px spacing (much bigger gaps!)
+                    
+                    if (distance < minDistance) {
+                        overlaps = true;
+                        break;
+                    }
+                }
+                
+                // If no overlap, place the emoji with full 360° random rotation
+                if (!overlaps) {
+                    positions.push({ x, y, size, radius });
+                    
+                    // Save canvas state
+                    ctx.save();
+                    
+                    // Move to emoji position
+                    ctx.translate(x, y);
+                    
+                    // Random rotation from 0° to 360° - each emoji tilted completely differently!
+                    const rotation = Math.random() * 2 * Math.PI;
+                    ctx.rotate(rotation);
+                    
+                    // Draw emoji at origin (0, 0) since we translated
+                    ctx.font = `${size}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(theme.emoji, 0, 0);
+                    
+                    // Restore canvas state
+                    ctx.restore();
+                }
+            }
+            
+            return canvas.toDataURL();
+        }
+        
+        let currentDifficulty = 'Easy';
+        let currentLevel = 1;
+        let currentLevelPattern = '';
+        let playerLives = 3;
+        let highestLevelEver = parseInt(localStorage.getItem('beeGameHighestLevel')) || 1;
+        let soundMuted = localStorage.getItem('soundMuted') === 'true' || false;
+        let tutorialShown = localStorage.getItem('beeTutorialShown') === 'true' || false;
+        let tutorialActive = false;
+        let queenBeeRewardActive = false;
+        let queenBeeUsed = false;
+        let continueCountOnLevel = 0;
+        let lastFailedLevel = -1;
+        let gridSize = DIFFICULTIES[currentDifficulty].grid;
+        let moveSpeed = DIFFICULTIES[currentDifficulty].speed;
+        let tiles = [];
+        let filledTiles = new Set();
+        let bees = []; // Array to hold multiple bees
+        let gameOver = false;
+        let animationFrame;
+        
+        // Encouraging messages for level completion with appropriate icons
+        const encouragingMessages = [
+            { text: "Sweet!", icon: "🍯" },
+            { text: "Awesome!", icon: "🌟" },
+            { text: "Fantastic!", icon: "✨" },
+            { text: "Bee-utiful!", icon: "🐝" },
+            { text: "Brilliant!", icon: "💎" },
+            { text: "Amazing!", icon: "🎉" },
+            { text: "Excellent!", icon: "🏆" },
+            { text: "Wonderful!", icon: "🌺" },
+            { text: "Outstanding!", icon: "⭐" },
+            { text: "Spectacular!", icon: "🎊" },
+            { text: "Incredible!", icon: "🚀" },
+            { text: "Magnificent!", icon: "👑" },
+            { text: "Superb!", icon: "💫" },
+            { text: "Terrific!", icon: "🔥" },
+            { text: "Marvelous!", icon: "🌈" },
+            { text: "Perfect!", icon: "💯" },
+            { text: "Splendid!", icon: "🌻" },
+            { text: "Stellar!", icon: "🌠" },
+            { text: "Phenomenal!", icon: "⚡" },
+            { text: "Exceptional!", icon: "🥇" },
+            { text: "You're on fire!", icon: "🔥" },
+            { text: "Unstoppable!", icon: "💪" },
+            { text: "Keep buzzing!", icon: "🐝" },
+            { text: "Bee-lieve it!", icon: "💛" },
+            { text: "Killing it!", icon: "⚔️" },
+            { text: "Like a pro!", icon: "😎" },
+            { text: "Nailed it!", icon: "🔨" },
+            { text: "You rock!", icon: "🤘" },
+            { text: "So smooth!", icon: "🧈" },
+            { text: "Legendary!", icon: "🏅" }
+        ];
+
+        const gameBoard = document.getElementById('gameBoard');
+        
+        // Prevent default drag and scroll behavior on game board
+        gameBoard.addEventListener('dragstart', (e) => e.preventDefault());
+        gameBoard.addEventListener('touchmove', (e) => {
+            if (isTouching) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+        
+        const tilesLeftEl = document.getElementById('tilesLeft');
+        const levelEl = document.getElementById('level');
+        const livesEl = document.getElementById('lives');
+        const difficultyEl = document.getElementById('difficulty');
+        const messageEl = document.getElementById('message');
+        
+        // Helper functions to show/hide message without layout shift
+        function showMessage(text, className = '') {
+            messageEl.className = '';
+            messageEl.innerHTML = '';
+
+            if (className === 'win') {
+                // Split into words and animate each one dropping in
+                const words = text.split(' ');
+                words.forEach((word, i) => {
+                    const span = document.createElement('span');
+                    span.className = 'msg-word';
+                    span.textContent = word;
+                    span.style.animationDelay = `${i * 0.1}s`;
+                    messageEl.appendChild(span);
+                });
+                messageEl.className = 'visible win';
+
+                // Burst floating emojis from the message position
+                const emojis = ['🐝','🌸','✨','🍯','🌼','💛','⭐','🌺'];
+                const rect = messageEl.getBoundingClientRect();
+                const cx = rect.left + rect.width / 2;
+                const cy = rect.top + rect.height / 2;
+
+                for (let i = 0; i < 10; i++) {
+                    const el = document.createElement('div');
+                    el.className = 'msg-emoji-particle';
+                    el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                    const angle = (Math.random() * 360);
+                    const spread = 40 + Math.random() * 60;
+                    el.style.left = (cx + Math.cos(angle * Math.PI/180) * spread) + 'px';
+                    el.style.top = (cy + Math.sin(angle * Math.PI/180) * spread * 0.5) + 'px';
+                    el.style.setProperty('--rot', `${-30 + Math.random() * 60}deg`);
+                    el.style.animationDelay = `${i * 0.07}s`;
+                    document.body.appendChild(el);
+                    setTimeout(() => el.remove(), 1400);
+                }
+            } else {
+                messageEl.textContent = text;
+                messageEl.className = className ? `visible ${className}` : 'visible';
+            }
+        }
+
+        function hideMessage() {
+            messageEl.className = '';
+            messageEl.innerHTML = '';
+        }
+
+        function showBeeDelivery(text, duration = 3000) {
+            const delivery = document.getElementById('beeDelivery');
+            const banner = document.getElementById('deliveryBannerText');
+            if (!delivery || !banner) return;
+
+            // Reset
+            delivery.className = '';
+            delivery.style.display = 'flex';
+            banner.textContent = text;
+
+            // Fly in
+            void delivery.offsetWidth;
+            delivery.classList.add('fly-in');
+
+            // Fly out after duration
+            setTimeout(() => {
+                delivery.classList.remove('fly-in');
+                delivery.classList.add('fly-out');
+                setTimeout(() => {
+                    delivery.style.display = 'none';
+                    delivery.className = '';
+                }, 800);
+            }, duration);
+        }
+        const queenBeeRewardMessageEl = document.getElementById('queenBeeRewardMessage');
+        const bestScoreEl = document.getElementById('bestScore');
+        const controlsEl = document.getElementById('controls');
+        const restartBtn = document.getElementById('restartBtn');
+        const difficultyBtn = document.getElementById('difficultyBtn');
+        const soundToggleBtn = document.getElementById('soundToggleBtn');
+        const queenBeeBtn = document.getElementById('queenBeeBtn');
+        const continueScreen = document.getElementById('continueScreen');
+        const continueButtons = document.getElementById('continueButtons');
+        const adContainer = document.getElementById('adContainer');
+        const continueBtn = document.getElementById('continueBtn');
+        const giveUpBtn = document.getElementById('giveUpBtn');
+        const interstitialAdScreen = document.getElementById('interstitialAdScreen');
+        const tutorialOverlay = document.getElementById('tutorialOverlay');
+        const tutorialArrow = document.getElementById('tutorialArrow');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const finalLevelEl = document.getElementById('finalLevel');
+        const highestLevelEl = document.getElementById('highestLevel');
+        const newHighScoreEl = document.getElementById('newHighScore');
+        const playAgainBtn = document.getElementById('playAgainBtn');
+        const shareBtn = document.getElementById('shareBtn');
+
+        function showTutorial() {
+            // Always use the top-left tile (index 0) for tutorial
+            const safeTileIndex = 0;
+            const tile = tiles[safeTileIndex];
+            
+            // Add highlight to tutorial tile and make it clickable above overlay
+            tile.style.boxShadow = '0 0 20px rgba(76, 175, 80, 0.8), inset 0 0 20px rgba(76, 175, 80, 0.3)';
+            tile.style.border = '3px solid #4CAF50';
+            tile.style.position = 'relative';
+            tile.style.zIndex = '260'; // Above the overlay (250)
+            tile.style.cursor = 'pointer';
+            
+            // Get exact position of the tile relative to game board
+            const boardRect = gameBoard.getBoundingClientRect();
+            const tileRect = tile.getBoundingClientRect();
+            
+            // Calculate tile center position relative to game board
+            const tileCenterX = tileRect.left - boardRect.left + (tileRect.width / 2);
+            const tileCenterY = tileRect.top - boardRect.top + (tileRect.height / 2);
+            
+            // Position arrow to point exactly at the center of the tile
+            // Move further down and to the right to align arrow tip with tile center
+            tutorialArrow.style.display = 'flex';
+            tutorialArrow.style.flexDirection = 'column';
+            tutorialArrow.style.alignItems = 'center';
+            tutorialArrow.style.left = (tileCenterX - 45) + 'px'; // Shift right (reduced offset from 60 to 45)
+            tutorialArrow.style.top = (tileCenterY - 85) + 'px'; // Move down more (changed from -60 to -85)
+            tutorialOverlay.style.display = 'block';
+            
+            // Mark only this tile for tutorial
+            tile.dataset.tutorialTile = 'true';
+        }
+
+        function completeTutorial() {
+            tutorialActive = false;
+            
+            // Remove highlight and special styling from tutorial tile
+            const tutorialTile = tiles[0];
+            if (tutorialTile) {
+                tutorialTile.style.boxShadow = '';
+                tutorialTile.style.border = '';
+                tutorialTile.style.position = '';
+                tutorialTile.style.zIndex = '';
+                tutorialTile.style.cursor = '';
+            }
+            
+            // Hide tutorial elements immediately
+            tutorialArrow.style.display = 'none';
+            tutorialOverlay.style.display = 'none';
+            
+            // Show encouragement message - make it visible!
+            showMessage('Great! Now continue, just don\'t kill the Bee!', 'win');
+            messageEl.style.opacity = '1';
+            
+            // Fade out message after 2.5 seconds, then start game
+            setTimeout(() => {
+                // Fade out
+                messageEl.style.transition = 'opacity 0.5s';
+                messageEl.style.opacity = '0';
+                
+                // After fade completes, clear message and start game
+                setTimeout(() => {
+                    hideMessage();
+                    messageEl.style.opacity = '1';
+                    messageEl.style.transition = '';
+                    
+                    // Mark tutorial as completed
+                    tutorialShown = true;
+                    localStorage.setItem('beeTutorialShown', 'true');
+                    
+                    // Start the game
+                    startBeeAnimation();
+                    playBackgroundMusic();
+                }, 500);
+            }, 2500);
+        }
+
+        function initGame(nextLevel = false) {
+            if (nextLevel) {
+                currentLevel++;
+            } else {
+                currentLevel = 1;
+                playerLives = 3; // Reset lives when starting new game
+                
+                // Reset Queen Bee reward on new game
+                queenBeeRewardActive = false;
+                queenBeeUsed = false;
+                continueCountOnLevel = 0;
+                lastFailedLevel = -1;
+                queenBeeBtn.style.display = 'none';
+            }
+            
+            // Hide controls during gameplay
+            controlsEl.classList.add('hide');
+            
+            // Hide game over screens and message
+            gameOverScreen.style.display = 'none';
+            continueScreen.style.display = 'none';
+            interstitialAdScreen.style.display = 'none';
+            hideMessage();
+            
+            // Calculate level parameters
+            const baseGrid = DIFFICULTIES[currentDifficulty].grid;
+            const baseSpeed = DIFFICULTIES[currentDifficulty].speed;
+            
+            // Increase grid size every 3 levels
+            gridSize = baseGrid + Math.floor((currentLevel - 1) / 3);
+            
+            // Increase speed by 15% per level
+            moveSpeed = baseSpeed * (1 + (currentLevel - 1) * 0.15);
+            
+            // Add second bee at level 5, third at level 10, etc.
+            const numBees = Math.floor((currentLevel - 1) / 5) + 1;
+            
+            // Generate pattern for this level
+            currentLevelPattern = generateLevelPattern(currentLevel);
+            
+            gameOver = false;
+            filledTiles.clear();
+            tiles = [];
+            bees = [];
+            
+            // Clear board
+            gameBoard.innerHTML = '';
+            
+            // Create inner container for grid
+            const inner = document.createElement('div');
+            inner.id = 'gameBoardInner';
+            gameBoard.appendChild(inner);
+            
+            // Set grid
+            inner.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+            inner.style.gridTemplateRows = `repeat(${gridSize}, 1fr)`;
+            
+            // Create tiles
+            for (let i = 0; i < gridSize * gridSize; i++) {
+                const tile = document.createElement('div');
+                tile.className = 'tile';
+                tile.dataset.index = i;
+                tile.setAttribute('tabindex', '-1');
+                tile.addEventListener('click', handleTileClick);
+                tile.addEventListener('touchstart', handleTileClick, { passive: true });
+                tile.addEventListener('mouseenter', handleTileEnter);
+                tile.addEventListener('mousedown', handleMouseDown);
+                inner.appendChild(tile);
+                tiles.push(tile);
+            }
+
+            // Blur any auto-focused element to prevent iOS tap highlight on first tile
+            if (document.activeElement && document.activeElement !== document.body) {
+                document.activeElement.blur();
+            }
+            
+            // Create bees
+            setTimeout(() => {
+                const boardSize = gameBoard.offsetWidth;
+                for (let i = 0; i < numBees; i++) {
+                    const bee = document.createElement('div');
+                    bee.className = 'bee';
+                    bee.textContent = '🐝';
+                    gameBoard.appendChild(bee);
+                    
+                    // Random starting position
+                    const beeData = {
+                        element: bee,
+                        position: {
+                            x: Math.random() * (boardSize - 40),
+                            y: Math.random() * (boardSize - 40)
+                        },
+                        velocity: { x: 0, y: 0 },
+                        rotation: 0,
+                        targetRotation: 0
+                    };
+                    
+                    // Random initial velocity
+                    const angle = Math.random() * Math.PI * 2;
+                    beeData.velocity = {
+                        x: Math.cos(angle) * moveSpeed,
+                        y: Math.sin(angle) * moveSpeed
+                    };
+                    
+                    // Set initial rotation
+                    beeData.rotation = angle * (180 / Math.PI);
+                    beeData.targetRotation = beeData.rotation;
+                    
+                    bees.push(beeData);
+                    updateBeePosition(beeData);
+                }
+                
+                // Check if tutorial should be shown
+                if (!tutorialShown && currentLevel === 1) {
+                    tutorialActive = true;
+                    showTutorial();
+                } else {
+                    startBeeAnimation();
+                    
+                    // Start background music
+                    playBackgroundMusic();
+                    
+                    // Show difficulty spike warning right after level starts
+                    const spikeWarning = getDifficultySpike(currentLevel);
+                    if (spikeWarning && nextLevel) {
+                        setTimeout(() => {
+                            showMessage(spikeWarning, 'lose');
+                            setTimeout(() => {
+                                hideMessage();
+                            }, 3000);
+                        }, 500); // Show warning 500ms after level starts
+                    }
+                }
+            }, 50);
+            
+            updateStats();
+        }
+
+        function updateStats() {
+            const tilesLeft = gridSize * gridSize - filledTiles.size - bees.length;
+            tilesLeftEl.textContent = tilesLeft;
+            levelEl.textContent = currentLevel;
+            livesEl.textContent = playerLives;
+            difficultyEl.textContent = currentDifficulty;
+        }
+
+        function updateBestScore() {
+            bestScoreEl.textContent = `Best: Level ${highestLevelEver}`;
+        }
+
+        function activateQueenBee() {
+            if (!queenBeeRewardActive || queenBeeUsed) return;
+            
+            // Mark as used
+            queenBeeUsed = true;
+            queenBeeRewardActive = false; // Reset so they can earn it again
+            queenBeeBtn.style.display = 'none';
+            
+            // Stop bee movement
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+                animationFrame = null;
+            }
+            
+            // Pause background music and play magical loop
+            forceStopAllAudio();
+            setTimeout(() => {
+                playQueenBeeMagicLoop();
+            }, 50);
+            
+            // Show activation message
+            showMessage('👑 Queen Bee freeze!', 'win');
+            
+            // Countdown: 3, 2, 1
+            let countdown = 3;
+            const countdownInterval = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                    showMessage(`👑 Queen Bee freeze! ${countdown}`, 'win');
+                } else {
+                    clearInterval(countdownInterval);
+                    hideMessage();
+                    
+                    // Stop magic loop and resume music
+                    forceStopAllAudio();
+                    setTimeout(() => {
+                        playBackgroundMusic();
+                    }, 100);
+                    
+                    // Resume bee animation
+                    startBeeAnimation();
+                }
+            }, 1000);
+        }
+
+        function retryLevel() {
+            // Retry the same level without changing level number or lives
+            gameOver = false;
+            filledTiles.clear();
+            tiles = [];
+            bees = [];
+            
+            // Hide controls during gameplay
+            controlsEl.classList.add('hide');
+            
+            // Clear board
+            gameBoard.innerHTML = '';
+            
+            // Create inner container for grid
+            const inner = document.createElement('div');
+            inner.id = 'gameBoardInner';
+            gameBoard.appendChild(inner);
+            
+            // Set grid
+            inner.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+            inner.style.gridTemplateRows = `repeat(${gridSize}, 1fr)`;
+            
+            // Create tiles
+            for (let i = 0; i < gridSize * gridSize; i++) {
+                const tile = document.createElement('div');
+                tile.className = 'tile';
+                tile.dataset.index = i;
+                tile.setAttribute('tabindex', '-1');
+                tile.addEventListener('click', handleTileClick);
+                tile.addEventListener('touchstart', handleTileClick, { passive: true });
+                tile.addEventListener('mouseenter', handleTileEnter);
+                tile.addEventListener('mousedown', handleMouseDown);
+                inner.appendChild(tile);
+                tiles.push(tile);
+            }
+            
+            // Create bees
+            setTimeout(() => {
+                const boardSize = gameBoard.offsetWidth;
+                const numBees = Math.floor((currentLevel - 1) / 5) + 1;
+                
+                for (let i = 0; i < numBees; i++) {
+                    const bee = document.createElement('div');
+                    bee.className = 'bee';
+                    bee.textContent = '🐝';
+                    gameBoard.appendChild(bee);
+                    
+                    const beeData = {
+                        element: bee,
+                        position: {
+                            x: Math.random() * (boardSize - 40),
+                            y: Math.random() * (boardSize - 40)
+                        },
+                        velocity: { x: 0, y: 0 },
+                        rotation: 0,
+                        targetRotation: 0
+                    };
+                    
+                    const angle = Math.random() * Math.PI * 2;
+                    beeData.velocity = {
+                        x: Math.cos(angle) * moveSpeed,
+                        y: Math.sin(angle) * moveSpeed
+                    };
+                    
+                    beeData.rotation = angle * (180 / Math.PI);
+                    beeData.targetRotation = beeData.rotation;
+                    
+                    bees.push(beeData);
+                    updateBeePosition(beeData);
+                }
+                
+                startBeeAnimation();
+                // Don't play music yet - wait for actual retry after death animation
+            }, 50);
+            
+            updateStats();
+        }
+
+        let isTouching = false;
+        let borderUpdatePending = false;
+
+        // Create audio context for sound effects
+        let audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        let musicNodes = null;
+        let musicPlaying = false;
+        let currentMusicStyle = 'piano';
+        let currentMusicTimeout = null;
+        let activeOscillators = []; // Track all active oscillators to stop them
+
+        // Fun, fantastical bee adventure melody
+        const bumblebeeNotes = [
+            // Bouncy, whimsical opening phrase
+            { note: 'C5', time: 0 }, { note: 'E5', time: 0.2 }, { note: 'G5', time: 0.4 }, { note: 'C6', time: 0.6 },
+            { note: 'B5', time: 0.8 }, { note: 'G5', time: 1.0 }, { note: 'E5', time: 1.2 }, { note: 'C5', time: 1.4 },
+            
+            // Magical ascending run
+            { note: 'D5', time: 1.6 }, { note: 'F5', time: 1.8 }, { note: 'A5', time: 2.0 }, { note: 'D6', time: 2.2 },
+            { note: 'C6', time: 2.4 }, { note: 'A5', time: 2.6 }, { note: 'F5', time: 2.8 }, { note: 'D5', time: 3.0 },
+            
+            // Playful jumping pattern
+            { note: 'E5', time: 3.2 }, { note: 'C5', time: 3.4 }, { note: 'G5', time: 3.6 }, { note: 'E5', time: 3.8 },
+            { note: 'A5', time: 4.0 }, { note: 'F5', time: 4.2 }, { note: 'D5', time: 4.4 }, { note: 'B4', time: 4.6 },
+            
+            // Happy resolution with flourish
+            { note: 'C5', time: 4.8 }, { note: 'E5', time: 5.0 }, { note: 'G5', time: 5.2 }, { note: 'E5', time: 5.4 },
+            { note: 'C5', time: 5.6 }, { note: 'G4', time: 5.8 }, { note: 'C5', time: 6.0 }, { note: 'E5', time: 6.2 },
+            
+            // Sparkly ending trill
+            { note: 'G5', time: 6.4 }, { note: 'F5', time: 6.5 }, { note: 'G5', time: 6.6 }, { note: 'A5', time: 6.7 },
+            { note: 'G5', time: 6.8 }, { note: 'F5', time: 6.9 }, { note: 'E5', time: 7.0 }, { note: 'D5', time: 7.1 },
+            { note: 'C5', time: 7.2 }
+        ];
+
+        const noteFrequencies = {
+            'G4': 392.00, 'A4': 440.00, 'B4': 493.88,
+            'C5': 523.25, 'D5': 587.33, 'E5': 659.25, 'F5': 698.46, 'G5': 783.99, 'A5': 880.00,
+            'B5': 987.77, 'C6': 1046.50, 'D6': 1174.66
+        };
+
+        function playBackgroundMusic() {
+            // Don't play if muted
+            if (soundMuted) return;
+            
+            // Stop any existing music first
+            stopBackgroundMusic();
+            
+            // Small delay to ensure previous music is stopped
+            setTimeout(() => {
+                musicPlaying = true;
+                
+                // Randomly select a style from expanded options
+                const styles = ['piano', '8bit', 'techno', 'opera', 'robotic', 'traditional', 'futuristic', 'metal', 'guitar', 'xylophone', 'none'];
+                currentMusicStyle = styles[Math.floor(Math.random() * styles.length)];
+            
+            console.log('Playing Bee Adventure Theme in', currentMusicStyle, 'style');
+            
+            try {
+                function playMelodyLoop(startTime) {
+                    if (!musicPlaying) return;
+                    
+                    const loopTime = startTime;
+                    const noteDuration = 0.18; // Bouncy, playful timing
+                    
+                    bumblebeeNotes.forEach((noteData, index) => {
+                        const freq = noteFrequencies[noteData.note];
+                        if (!freq) return;
+                        
+                        const osc = audioContext.createOscillator();
+                        const gain = audioContext.createGain();
+                        
+                        // Style-specific settings
+                        switch(currentMusicStyle) {
+                            case 'piano':
+                                osc.type = 'triangle';
+                                gain.gain.setValueAtTime(0.15, loopTime + noteData.time);
+                                gain.gain.exponentialRampToValueAtTime(0.01, loopTime + noteData.time + noteDuration);
+                                break;
+                            
+                            case '8bit':
+                                osc.type = 'square';
+                                gain.gain.setValueAtTime(0.12, loopTime + noteData.time);
+                                gain.gain.exponentialRampToValueAtTime(0.01, loopTime + noteData.time + noteDuration);
+                                break;
+                            
+                            case 'techno':
+                                osc.type = 'sawtooth';
+                                // Add vibrato for techno effect
+                                const lfo = audioContext.createOscillator();
+                                const lfoGain = audioContext.createGain();
+                                lfo.frequency.value = 6;
+                                lfoGain.gain.value = 10;
+                                lfo.connect(lfoGain);
+                                lfoGain.connect(osc.frequency);
+                                lfo.start(loopTime + noteData.time);
+                                lfo.stop(loopTime + noteData.time + noteDuration);
+                                
+                                gain.gain.setValueAtTime(0.13, loopTime + noteData.time);
+                                gain.gain.setValueAtTime(0.13, loopTime + noteData.time + noteDuration * 0.8);
+                                gain.gain.exponentialRampToValueAtTime(0.01, loopTime + noteData.time + noteDuration);
+                                break;
+                            
+                            case 'opera':
+                                osc.type = 'sine';
+                                // Smooth, vocal-like envelope
+                                gain.gain.setValueAtTime(0.1, loopTime + noteData.time);
+                                gain.gain.linearRampToValueAtTime(0.14, loopTime + noteData.time + noteDuration * 0.3);
+                                gain.gain.linearRampToValueAtTime(0.12, loopTime + noteData.time + noteDuration * 0.7);
+                                gain.gain.exponentialRampToValueAtTime(0.01, loopTime + noteData.time + noteDuration);
+                                break;
+                            
+                            case 'robotic':
+                                osc.type = 'square';
+                                // Harsh, mechanical sound with pitch bend
+                                osc.frequency.setValueAtTime(freq * 0.99, loopTime + noteData.time);
+                                osc.frequency.linearRampToValueAtTime(freq * 1.01, loopTime + noteData.time + noteDuration);
+                                
+                                gain.gain.setValueAtTime(0.14, loopTime + noteData.time);
+                                gain.gain.setValueAtTime(0.14, loopTime + noteData.time + noteDuration * 0.9);
+                                gain.gain.exponentialRampToValueAtTime(0.01, loopTime + noteData.time + noteDuration);
+                                break;
+                            
+                            case 'traditional':
+                                osc.type = 'sine';
+                                // Pure classical tone with gentle decay
+                                gain.gain.setValueAtTime(0.13, loopTime + noteData.time);
+                                gain.gain.exponentialRampToValueAtTime(0.01, loopTime + noteData.time + noteDuration * 1.5);
+                                break;
+                            
+                            case 'futuristic':
+                                osc.type = 'sawtooth';
+                                // Sci-fi effect with frequency sweeps
+                                const lfo2 = audioContext.createOscillator();
+                                const lfoGain2 = audioContext.createGain();
+                                lfo2.frequency.value = 12;
+                                lfoGain2.gain.value = 20;
+                                lfo2.connect(lfoGain2);
+                                lfoGain2.connect(osc.frequency);
+                                lfo2.start(loopTime + noteData.time);
+                                lfo2.stop(loopTime + noteData.time + noteDuration);
+                                
+                                gain.gain.setValueAtTime(0.11, loopTime + noteData.time);
+                                gain.gain.exponentialRampToValueAtTime(0.01, loopTime + noteData.time + noteDuration);
+                                break;
+                            
+                            case 'metal':
+                                osc.type = 'sawtooth';
+                                // Heavy distorted sound
+                                const osc2 = audioContext.createOscillator();
+                                osc2.type = 'square';
+                                osc2.frequency.setValueAtTime(freq * 0.5, loopTime + noteData.time); // Octave down
+                                osc2.connect(gain);
+                                osc2.start(loopTime + noteData.time);
+                                osc2.stop(loopTime + noteData.time + noteDuration);
+                                
+                                gain.gain.setValueAtTime(0.16, loopTime + noteData.time);
+                                gain.gain.exponentialRampToValueAtTime(0.01, loopTime + noteData.time + noteDuration);
+                                break;
+                            
+                            case 'guitar':
+                                osc.type = 'sawtooth';
+                                // Plucked string effect with harmonics
+                                const harmonic = audioContext.createOscillator();
+                                const harmonicGain = audioContext.createGain();
+                                harmonic.type = 'sine';
+                                harmonic.frequency.setValueAtTime(freq * 2, loopTime + noteData.time);
+                                harmonicGain.gain.setValueAtTime(0.05, loopTime + noteData.time);
+                                harmonicGain.gain.exponentialRampToValueAtTime(0.01, loopTime + noteData.time + noteDuration * 0.5);
+                                harmonic.connect(harmonicGain);
+                                harmonicGain.connect(audioContext.destination);
+                                harmonic.start(loopTime + noteData.time);
+                                harmonic.stop(loopTime + noteData.time + noteDuration);
+                                
+                                gain.gain.setValueAtTime(0.14, loopTime + noteData.time);
+                                gain.gain.exponentialRampToValueAtTime(0.01, loopTime + noteData.time + noteDuration * 0.8);
+                                break;
+                            
+                            case 'xylophone':
+                                osc.type = 'sine';
+                                // Bright, percussive xylophone with harmonics
+                                const xyloHarmonic1 = audioContext.createOscillator();
+                                const xyloHarmonic2 = audioContext.createOscillator();
+                                const xyloGain1 = audioContext.createGain();
+                                const xyloGain2 = audioContext.createGain();
+                                
+                                xyloHarmonic1.type = 'sine';
+                                xyloHarmonic2.type = 'sine';
+                                xyloHarmonic1.frequency.setValueAtTime(freq * 3, loopTime + noteData.time);
+                                xyloHarmonic2.frequency.setValueAtTime(freq * 5, loopTime + noteData.time);
+                                
+                                xyloGain1.gain.setValueAtTime(0.08, loopTime + noteData.time);
+                                xyloGain1.gain.exponentialRampToValueAtTime(0.01, loopTime + noteData.time + noteDuration * 0.5);
+                                xyloGain2.gain.setValueAtTime(0.05, loopTime + noteData.time);
+                                xyloGain2.gain.exponentialRampToValueAtTime(0.01, loopTime + noteData.time + noteDuration * 0.4);
+                                
+                                xyloHarmonic1.connect(xyloGain1);
+                                xyloGain1.connect(audioContext.destination);
+                                xyloHarmonic2.connect(xyloGain2);
+                                xyloGain2.connect(audioContext.destination);
+                                
+                                xyloHarmonic1.start(loopTime + noteData.time);
+                                xyloHarmonic1.stop(loopTime + noteData.time + noteDuration);
+                                xyloHarmonic2.start(loopTime + noteData.time);
+                                xyloHarmonic2.stop(loopTime + noteData.time + noteDuration);
+                                
+                                gain.gain.setValueAtTime(0.12, loopTime + noteData.time);
+                                gain.gain.exponentialRampToValueAtTime(0.01, loopTime + noteData.time + noteDuration * 0.6);
+                                break;
+                            
+                            case 'none':
+                                osc.type = 'sine';
+                                // Plain sine wave, no effects
+                                gain.gain.setValueAtTime(0.12, loopTime + noteData.time);
+                                gain.gain.exponentialRampToValueAtTime(0.01, loopTime + noteData.time + noteDuration);
+                                break;
+                        }
+                        
+                        osc.frequency.setValueAtTime(freq, loopTime + noteData.time);
+                        osc.connect(gain);
+                        gain.connect(audioContext.destination);
+                        
+                        // Track oscillator so we can force stop it
+                        activeOscillators.push(osc);
+                        
+                        osc.start(loopTime + noteData.time);
+                        osc.stop(loopTime + noteData.time + noteDuration);
+                    });
+                    
+                    // Add bass line for techno and metal styles
+                    if (currentMusicStyle === 'techno' || currentMusicStyle === 'metal') {
+                        const bassTimes = [0, 0.8, 1.6, 2.4, 3.2, 4.0, 4.8, 5.6, 6.4, 7.2];
+                        bassTimes.forEach(time => {
+                            const osc = audioContext.createOscillator();
+                            const gain = audioContext.createGain();
+                            
+                            osc.type = 'sine';
+                            // Alternate between C and G for fun bouncy bass
+                            const bassFreq = (time % 1.6 === 0) ? 130.81 : 196.00; // C3 or G3
+                            osc.frequency.setValueAtTime(bassFreq, loopTime + time);
+                            
+                            const volume = currentMusicStyle === 'metal' ? 0.25 : 0.2;
+                            gain.gain.setValueAtTime(volume, loopTime + time);
+                            gain.gain.exponentialRampToValueAtTime(0.01, loopTime + time + 0.6);
+                            
+                            osc.connect(gain);
+                            gain.connect(audioContext.destination);
+                            
+                            // Track oscillator so we can force stop it
+                            activeOscillators.push(osc);
+                            
+                            osc.start(loopTime + time);
+                            osc.stop(loopTime + time + 0.6);
+                        });
+                    }
+                    
+                    // Schedule next loop
+                    if (musicPlaying) {
+                        currentMusicTimeout = setTimeout(() => {
+                            playMelodyLoop(audioContext.currentTime);
+                        }, 7300); // Loop every 7.3 seconds
+                    }
+                }
+                
+                playMelodyLoop(audioContext.currentTime);
+                
+            } catch (e) {
+                console.log('Music not available');
+            }
+            }, 100); // 100ms delay to ensure clean start
+        }
+
+
+        function stopBackgroundMusic() {
+            musicPlaying = false;
+            
+            // Clear any scheduled loop
+            if (currentMusicTimeout) {
+                clearTimeout(currentMusicTimeout);
+                currentMusicTimeout = null;
+            }
+        }
+        
+        function forceStopAllAudio() {
+            // Most aggressive stop: close and recreate entire audio context
+            musicPlaying = false;
+            
+            // Clear any scheduled loop
+            if (currentMusicTimeout) {
+                clearTimeout(currentMusicTimeout);
+                currentMusicTimeout = null;
+            }
+            
+            // Stop all active oscillators
+            activeOscillators.forEach(osc => {
+                try {
+                    osc.stop();
+                } catch (e) {
+                    // Already stopped
+                }
+            });
+            activeOscillators = [];
+            
+            // Close the audio context completely to kill ALL sounds
+            try {
+                audioContext.close();
+                // Create a brand new audio context
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.log('Could not recreate audio context');
+            }
+        }
+
+        function playClickSound() {
+            if (soundMuted) return;
+            try {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                // Soft, pleasant click sound
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.05);
+                
+                // Volume envelope for soft, gentle sound
+                gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.1);
+            } catch (e) {
+                // Silent fail if audio doesn't work
+                console.log('Audio not available');
+            }
+        }
+
+        function playBeeDeathSound() {
+            if (soundMuted) return;
+            try {
+                const now = audioContext.currentTime;
+                
+                // Create a dramatic, sad descending sound
+                const oscillator1 = audioContext.createOscillator();
+                const oscillator2 = audioContext.createOscillator();
+                const oscillator3 = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                // Horrifying dissonant chord that descends
+                oscillator1.type = 'sawtooth';
+                oscillator2.type = 'square';
+                oscillator3.type = 'sine';
+                
+                // Start with a harsh high frequency
+                oscillator1.frequency.setValueAtTime(880, now);
+                oscillator2.frequency.setValueAtTime(660, now);
+                oscillator3.frequency.setValueAtTime(440, now);
+                
+                // Dramatic descent into darkness
+                oscillator1.frequency.exponentialRampToValueAtTime(110, now + 0.8);
+                oscillator2.frequency.exponentialRampToValueAtTime(82, now + 0.8);
+                oscillator3.frequency.exponentialRampToValueAtTime(55, now + 0.8);
+                
+                // Volume envelope - loud shock then fade
+                gainNode.gain.setValueAtTime(0.4, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.2, now + 0.3);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
+                
+                oscillator1.connect(gainNode);
+                oscillator2.connect(gainNode);
+                oscillator3.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator1.start(now);
+                oscillator2.start(now);
+                oscillator3.start(now);
+                oscillator1.stop(now + 0.8);
+                oscillator2.stop(now + 0.8);
+                oscillator3.stop(now + 0.8);
+            } catch (e) {
+                console.log('Audio not available');
+            }
+        }
+
+        function playWinSound() {
+            if (soundMuted) return;
+            try {
+                const now = audioContext.currentTime;
+                
+                // Victory fanfare - ascending triumphant melody
+                const notes = [
+                    { freq: 523.25, time: 0, duration: 0.15 },      // C5
+                    { freq: 659.25, time: 0.15, duration: 0.15 },   // E5
+                    { freq: 783.99, time: 0.3, duration: 0.15 },    // G5
+                    { freq: 1046.50, time: 0.45, duration: 0.4 }    // C6 (hold)
+                ];
+                
+                notes.forEach(note => {
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(note.freq, now + note.time);
+                    
+                    // Triumphant envelope
+                    gain.gain.setValueAtTime(0.25, now + note.time);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + note.time + note.duration);
+                    
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+                    
+                    osc.start(now + note.time);
+                    osc.stop(now + note.time + note.duration);
+                });
+                
+                // Add sparkly harmonics for magical effect
+                const sparkles = [
+                    { freq: 2093, time: 0.5, duration: 0.3 },   // C7
+                    { freq: 2349, time: 0.55, duration: 0.25 }, // D7
+                    { freq: 2637, time: 0.6, duration: 0.2 }    // E7
+                ];
+                
+                sparkles.forEach(sparkle => {
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(sparkle.freq, now + sparkle.time);
+                    
+                    gain.gain.setValueAtTime(0.15, now + sparkle.time);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + sparkle.time + sparkle.duration);
+                    
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+                    
+                    osc.start(now + sparkle.time);
+                    osc.stop(now + sparkle.time + sparkle.duration);
+                });
+            } catch (e) {
+                console.log('Audio not available');
+            }
+        }
+
+        function playQueenBeeRewardSound() {
+            if (soundMuted) return;
+            try {
+                const now = audioContext.currentTime;
+                
+                // Magical Fairy Dust - quick ascending sparkles with shimmer
+                const notes = [
+                    { freq: 1046.50, time: 0, duration: 0.05 },    // C6
+                    { freq: 1318.51, time: 0.05, duration: 0.05 }, // E6
+                    { freq: 1567.98, time: 0.10, duration: 0.05 }, // G6
+                    { freq: 2093.00, time: 0.15, duration: 0.1 }   // C7 (hold slightly)
+                ];
+                
+                notes.forEach(note => {
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    
+                    osc.type = 'sine'; // Pure, bell-like tone
+                    osc.frequency.setValueAtTime(note.freq, now + note.time);
+                    
+                    // Quick, sparkly envelope
+                    gain.gain.setValueAtTime(0.25, now + note.time);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + note.time + note.duration);
+                    
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+                    
+                    osc.start(now + note.time);
+                    osc.stop(now + note.time + note.duration);
+                });
+                
+                // High sparkles - shimmer effect (fairy dust!)
+                const sparkles = [
+                    { freq: 2637.02, time: 0.16, duration: 0.12 }, // E7
+                    { freq: 3135.96, time: 0.18, duration: 0.1 },  // G7
+                    { freq: 3951.07, time: 0.20, duration: 0.08 }  // B7
+                ];
+                
+                sparkles.forEach(sparkle => {
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(sparkle.freq, now + sparkle.time);
+                    
+                    // Delicate shimmer
+                    gain.gain.setValueAtTime(0.12, now + sparkle.time);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + sparkle.time + sparkle.duration);
+                    
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+                    
+                    osc.start(now + sparkle.time);
+                    osc.stop(now + sparkle.time + sparkle.duration);
+                });
+            } catch (err) {
+                console.error('Queen Bee reward sound error:', err);
+            }
+        }
+
+        function playQueenBeeMagicLoop() {
+            if (soundMuted) return null;
+            try {
+                const now = audioContext.currentTime;
+                const loopDuration = 0.8; // Each loop cycle
+                const oscillators = [];
+                
+                // Create a magical ascending-descending arpeggio that loops
+                function createMagicLoop(startTime) {
+                    // Ascending sparkle
+                    const ascendingNotes = [
+                        { freq: 1046.50, time: 0, duration: 0.15 },    // C6
+                        { freq: 1318.51, time: 0.15, duration: 0.15 }, // E6
+                        { freq: 1567.98, time: 0.3, duration: 0.15 },  // G6
+                    ];
+                    
+                    // Descending shimmer
+                    const descendingNotes = [
+                        { freq: 1567.98, time: 0.45, duration: 0.12 }, // G6
+                        { freq: 1318.51, time: 0.57, duration: 0.12 }, // E6
+                        { freq: 1046.50, time: 0.68, duration: 0.12 }, // C6
+                    ];
+                    
+                    const allNotes = [...ascendingNotes, ...descendingNotes];
+                    
+                    allNotes.forEach(note => {
+                        const osc = audioContext.createOscillator();
+                        const gain = audioContext.createGain();
+                        
+                        osc.type = 'sine'; // Pure, magical tone
+                        osc.frequency.setValueAtTime(note.freq, startTime + note.time);
+                        
+                        // Gentle, flowing envelope
+                        gain.gain.setValueAtTime(0.15, startTime + note.time);
+                        gain.gain.exponentialRampToValueAtTime(0.01, startTime + note.time + note.duration);
+                        
+                        osc.connect(gain);
+                        gain.connect(audioContext.destination);
+                        
+                        osc.start(startTime + note.time);
+                        osc.stop(startTime + note.time + note.duration);
+                        
+                        oscillators.push(osc);
+                    });
+                    
+                    // Add high sparkles for extra magic
+                    const sparkles = [
+                        { freq: 2093, time: 0.3, duration: 0.15 },  // C7
+                        { freq: 2637, time: 0.68, duration: 0.12 }  // E7
+                    ];
+                    
+                    sparkles.forEach(sparkle => {
+                        const osc = audioContext.createOscillator();
+                        const gain = audioContext.createGain();
+                        
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(sparkle.freq, startTime + sparkle.time);
+                        
+                        gain.gain.setValueAtTime(0.08, startTime + sparkle.time);
+                        gain.gain.exponentialRampToValueAtTime(0.01, startTime + sparkle.time + sparkle.duration);
+                        
+                        osc.connect(gain);
+                        gain.connect(audioContext.destination);
+                        
+                        osc.start(startTime + sparkle.time);
+                        osc.stop(startTime + sparkle.time + sparkle.duration);
+                        
+                        oscillators.push(osc);
+                    });
+                }
+                
+                // Create 4 loops (for ~3.2 seconds of magic)
+                for (let i = 0; i < 4; i++) {
+                    createMagicLoop(now + (i * loopDuration));
+                }
+                
+                return oscillators;
+            } catch (err) {
+                console.error('Queen Bee magic loop error:', err);
+                return null;
+            }
+        }
+
+        function getDifficultySpike(level) {
+            // Check if this level has a difficulty spike and return warning message
+            const spikes = {
+                4: `Warning - Level 4: Grid expands to 5×5!`,
+                6: `Warning - Level 6: 2nd bee appears!`,
+                7: `Warning - Level 7: Grid expands to 6×6!`,
+                10: `Warning - Level 10: Grid expands to 7×7!`,
+                11: `Warning - Level 11: 3rd bee appears!`,
+                13: `Warning - Level 13: Grid expands to 8×8!`,
+                16: `Warning - Level 16: Grid expands to 9×9 and 4th bee appears! Much harder!`,
+                19: `Warning - Level 19: Grid expands to 10×10!`,
+                21: `Warning - Level 21: 5th bee appears!`,
+                22: `Warning - Level 22: Grid expands to 11×11!`,
+                25: `Warning - Level 25: Grid expands to 12×12!`,
+                26: `Warning - Level 26: 6th bee appears!`,
+                28: `Warning - Level 28: Grid expands to 13×13!`,
+                31: `Warning - Level 31: Grid expands to 14×14 and 7th bee appears!`,
+            };
+            
+            return spikes[level] || null;
+        }
+
+        function checkLevelComplete() {
+            // Check if level is complete - no more tiles can be safely filled
+            // Level is complete when all empty tiles currently have bees on them
+            
+            // Safety check - make sure bees exist
+            if (!bees || bees.length === 0) return false;
+            
+            const tileSize = gameBoard.offsetWidth / gridSize;
+            
+            // Safety check for valid board size
+            if (!tileSize || tileSize === 0) return false;
+            
+            // Get set of tiles that currently have bees
+            const beeTiles = new Set();
+            for (let beeData of bees) {
+                if (!beeData || !beeData.position) continue;
+                
+                const beeRow = Math.floor((beeData.position.y + 20) / tileSize);
+                const beeCol = Math.floor((beeData.position.x + 20) / tileSize);
+                if (beeRow >= 0 && beeRow < gridSize && beeCol >= 0 && beeCol < gridSize) {
+                    const beeTileIndex = beeRow * gridSize + beeCol;
+                    beeTiles.add(beeTileIndex);
+                }
+            }
+            
+            // Count how many empty tiles don't have bees
+            let safeTilesToFill = 0;
+            for (let i = 0; i < gridSize * gridSize; i++) {
+                if (!filledTiles.has(i) && !beeTiles.has(i)) {
+                    safeTilesToFill++;
+                }
+            }
+            
+            // If there are no safe tiles to fill and we've filled at least one tile, level is complete
+            if (safeTilesToFill === 0 && filledTiles.size > 0) {
+                endGame(true);
+                return true;
+            }
+            
+            return false;
+        }
+
+        function handleTileClick(e) {
+            if (gameOver) return;
+            
+            // Prevent default behavior for touch events
+            if (e.type === 'touchstart') {
+                e.preventDefault();
+                isTouching = true;
+            }
+            
+            const index = parseInt(e.target.dataset.index);
+            
+            // Handle tutorial - ONLY allow clicking tile index 0 (top-left)
+            if (tutorialActive) {
+                console.log('Tutorial active, clicked tile:', index);
+                if (index === 0) {
+                    console.log('Correct tile! Completing tutorial...');
+                    // Correct tile clicked
+                    e.target.classList.add('filled');
+                    
+                    // Calculate tile size and apply pattern
+                    const tileSize = gameBoard.offsetWidth / gridSize;
+                    const bgStyle = getTileBackgroundStyle(index, gridSize, tileSize);
+                    
+                    e.target.style.backgroundImage = `url(${currentLevelPattern})`;
+                    e.target.style.backgroundSize = bgStyle.size;
+                    e.target.style.backgroundPosition = bgStyle.position;
+                    
+                    filledTiles.add(index);
+                    
+                    // Update borders for all filled tiles
+                    updateAllFilledTileBorders();
+                    
+                    playClickSound();
+                    completeTutorial();
+                } else {
+                    console.log('Wrong tile, ignoring click');
+                }
+                // Block all clicks during tutorial (whether correct or not)
+                return;
+            }
+            
+            // Check if any bee is on this tile with precise collision
+            const tileSize = gameBoard.offsetWidth / gridSize;
+            const tileRow = Math.floor(index / gridSize);
+            const tileCol = index % gridSize;
+            
+            // Get tile boundaries
+            const tileLeft = tileCol * tileSize;
+            const tileRight = (tileCol + 1) * tileSize;
+            const tileTop = tileRow * tileSize;
+            const tileBottom = (tileRow + 1) * tileSize;
+            
+            for (let beeData of bees) {
+                // Bee collision box (center of the bee emoji, accounting for actual bee size)
+                const beeLeft = beeData.position.x + 10; // 10px margin from left
+                const beeRight = beeData.position.x + 30; // 30px from left (20px bee width)
+                const beeTop = beeData.position.y + 10; // 10px margin from top
+                const beeBottom = beeData.position.y + 30; // 30px from top (20px bee height)
+                
+                // Check if bee overlaps with tile
+                const overlaps = !(beeRight < tileLeft || 
+                                   beeLeft > tileRight || 
+                                   beeBottom < tileTop || 
+                                   beeTop > tileBottom);
+                
+                if (overlaps) {
+                    // Game over - bee died
+                    playBeeDeathSound(); // Play horrifying death sound
+                    endGame(false);
+                    return;
+                }
+            }
+            
+            // Fill tile
+            if (!filledTiles.has(index)) {
+                filledTiles.add(index);
+                e.target.classList.add('filled');
+                
+                // Calculate tile size and apply pattern
+                const tileSize = gameBoard.offsetWidth / gridSize;
+                const bgStyle = getTileBackgroundStyle(index, gridSize, tileSize);
+                
+                e.target.style.backgroundImage = `url(${currentLevelPattern})`;
+                e.target.style.backgroundSize = bgStyle.size;
+                e.target.style.backgroundPosition = bgStyle.position;
+                
+                // Update borders for all filled tiles
+                updateAllFilledTileBorders();
+                
+                playClickSound(); // Play satisfying click sound
+                updateStats();
+                
+                // Check if level is complete
+                checkLevelComplete();
+            }
+        }
+
+        function handleTileEnter(e) {
+            if (gameOver) return;
+            
+            // Block all tile interactions during tutorial
+            if (tutorialActive) return;
+            
+            // For touch events, find which tile is under the touch
+            let targetTile = e.target;
+            if (e.type === 'touchmove') {
+                e.preventDefault();
+                e.stopPropagation();
+                if (!isTouching) return;
+                
+                const touch = e.touches[0];
+                if (!touch) return;
+                
+                targetTile = document.elementFromPoint(touch.clientX, touch.clientY);
+                if (!targetTile || !targetTile.classList.contains('tile')) return;
+            } else if (e.type === 'mouseenter') {
+                if (!isTouching) return;
+            }
+            
+            const index = parseInt(targetTile.dataset.index);
+            if (isNaN(index)) return;
+            
+            // Check if any bee is on this tile with precise collision
+            const tileSize = gameBoard.offsetWidth / gridSize;
+            const tileRow = Math.floor(index / gridSize);
+            const tileCol = index % gridSize;
+            
+            // Get tile boundaries
+            const tileLeft = tileCol * tileSize;
+            const tileRight = (tileCol + 1) * tileSize;
+            const tileTop = tileRow * tileSize;
+            const tileBottom = (tileRow + 1) * tileSize;
+            
+            for (let beeData of bees) {
+                // Bee collision box (center of the bee emoji, accounting for actual bee size)
+                const beeLeft = beeData.position.x + 10; // 10px margin from left
+                const beeRight = beeData.position.x + 30; // 30px from left (20px bee width)
+                const beeTop = beeData.position.y + 10; // 10px margin from top
+                const beeBottom = beeData.position.y + 30; // 30px from top (20px bee height)
+                
+                // Check if bee overlaps with tile
+                const overlaps = !(beeRight < tileLeft || 
+                                   beeLeft > tileRight || 
+                                   beeBottom < tileTop || 
+                                   beeTop > tileBottom);
+                
+                if (overlaps) {
+                    // Game over - bee died
+                    playBeeDeathSound(); // Play horrifying death sound
+                    endGame(false);
+                    return;
+                }
+            }
+            
+            // Fill tile
+            if (!filledTiles.has(index)) {
+                filledTiles.add(index);
+                targetTile.classList.add('filled');
+                
+                // Calculate tile size and apply pattern
+                const tileSize = gameBoard.offsetWidth / gridSize;
+                const bgStyle = getTileBackgroundStyle(index, gridSize, tileSize);
+                
+                targetTile.style.backgroundImage = `url(${currentLevelPattern})`;
+                targetTile.style.backgroundSize = bgStyle.size;
+                targetTile.style.backgroundPosition = bgStyle.position;
+                
+                // Request border update (batched for performance)
+                requestBorderUpdate();
+                
+                playClickSound(); // Play satisfying click sound
+                updateStats();
+                
+                // Check if level is complete
+                checkLevelComplete();
+            }
+        }
+
+        function handleTouchEnd(e) {
+            isTouching = false;
+        }
+
+        function handleMouseDown(e) {
+            if (gameOver) return;
+            
+            // Block mouse down during tutorial (except for tile 0 which is handled in handleTileClick)
+            if (tutorialActive) return;
+            
+            isTouching = true;
+        }
+
+        function handleMouseUp(e) {
+            isTouching = false;
+        }
+
+        function startBeeAnimation() {
+            if (animationFrame) cancelAnimationFrame(animationFrame);
+            
+            let frameCount = 0;
+            
+            function animate() {
+                if (gameOver) return;
+                
+                const boardSize = gameBoard.offsetWidth;
+                const beeSize = 40;
+                const tileSize = boardSize / gridSize;
+                
+                // Safety check
+                if (!bees || bees.length === 0 || !boardSize || boardSize === 0) {
+                    animationFrame = requestAnimationFrame(animate);
+                    return;
+                }
+                
+                frameCount++;
+                
+                // Update each bee
+                for (let beeData of bees) {
+                    // Add random direction changes every 60-120 frames
+                    if (frameCount % Math.floor(60 + Math.random() * 60) === 0) {
+                        const randomAngle = (Math.random() - 0.5) * Math.PI;
+                        const currentAngle = Math.atan2(beeData.velocity.y, beeData.velocity.x);
+                        const newAngle = currentAngle + randomAngle;
+                        const speed = Math.sqrt(beeData.velocity.x ** 2 + beeData.velocity.y ** 2);
+                        beeData.velocity.x = Math.cos(newAngle) * speed;
+                        beeData.velocity.y = Math.sin(newAngle) * speed;
+                    }
+                    
+                    // Continuous subtle direction drift
+                    if (Math.random() < 0.05) {
+                        const driftAngle = (Math.random() - 0.5) * 0.2;
+                        const speed = Math.sqrt(beeData.velocity.x ** 2 + beeData.velocity.y ** 2);
+                        const currentAngle = Math.atan2(beeData.velocity.y, beeData.velocity.x);
+                        const newAngle = currentAngle + driftAngle;
+                        beeData.velocity.x = Math.cos(newAngle) * speed;
+                        beeData.velocity.y = Math.sin(newAngle) * speed;
+                    }
+                    
+                    // Calculate next position
+                    let nextX = beeData.position.x + beeData.velocity.x;
+                    let nextY = beeData.position.y + beeData.velocity.y;
+                    
+                    // Store old velocity for rotation detection
+                    const oldVelocityX = beeData.velocity.x;
+                    const oldVelocityY = beeData.velocity.y;
+                    
+                    // Check collision with filled tiles
+                    const beeCenterX = nextX + beeSize / 2;
+                    const beeCenterY = nextY + beeSize / 2;
+                    const nextRow = Math.floor(beeCenterY / tileSize);
+                    const nextCol = Math.floor(beeCenterX / tileSize);
+                    const nextTileIndex = nextRow * gridSize + nextCol;
+                    
+                    // If next tile is filled, bounce
+                    if (filledTiles.has(nextTileIndex)) {
+                        const currentRow = Math.floor((beeData.position.y + beeSize / 2) / tileSize);
+                        const currentCol = Math.floor((beeData.position.x + beeSize / 2) / tileSize);
+                        
+                        if (nextCol !== currentCol) {
+                            beeData.velocity.x *= -1;
+                            nextX = beeData.position.x;
+                        }
+                        
+                        if (nextRow !== currentRow) {
+                            beeData.velocity.y *= -1;
+                            nextY = beeData.position.y;
+                        }
+                        
+                        const randomAngle = (Math.random() - 0.5) * 0.8;
+                        const speed = Math.sqrt(beeData.velocity.x ** 2 + beeData.velocity.y ** 2);
+                        const currentAngle = Math.atan2(beeData.velocity.y, beeData.velocity.x);
+                        const newAngle = currentAngle + randomAngle;
+                        beeData.velocity.x = Math.cos(newAngle) * speed;
+                        beeData.velocity.y = Math.sin(newAngle) * speed;
+                    }
+                    
+                    // Update position
+                    beeData.position.x = nextX;
+                    beeData.position.y = nextY;
+                    
+                    // Bounce off walls with random angle
+                    if (beeData.position.x <= 0 || beeData.position.x >= boardSize - beeSize) {
+                        beeData.velocity.x *= -1;
+                        beeData.position.x = Math.max(0, Math.min(boardSize - beeSize, beeData.position.x));
+                        const randomVertical = (Math.random() - 0.5) * moveSpeed;
+                        beeData.velocity.y += randomVertical;
+                    }
+                    
+                    if (beeData.position.y <= 0 || beeData.position.y >= boardSize - beeSize) {
+                        beeData.velocity.y *= -1;
+                        beeData.position.y = Math.max(0, Math.min(boardSize - beeSize, beeData.position.y));
+                        const randomHorizontal = (Math.random() - 0.5) * moveSpeed;
+                        beeData.velocity.x += randomHorizontal;
+                    }
+                    
+                    // Normalize speed to keep it consistent
+                    const currentSpeed = Math.sqrt(beeData.velocity.x ** 2 + beeData.velocity.y ** 2);
+                    if (currentSpeed > 0) {
+                        const targetSpeed = moveSpeed * (0.8 + Math.random() * 0.4);
+                        beeData.velocity.x = (beeData.velocity.x / currentSpeed) * targetSpeed;
+                        beeData.velocity.y = (beeData.velocity.y / currentSpeed) * targetSpeed;
+                    }
+                    
+                    // Update target rotation
+                    if (beeData.velocity.x !== oldVelocityX || beeData.velocity.y !== oldVelocityY) {
+                        let angle = Math.atan2(beeData.velocity.y, Math.abs(beeData.velocity.x)) * (180 / Math.PI);
+                        angle = Math.max(-45, Math.min(45, angle));
+                        beeData.targetRotation = angle;
+                    }
+                    
+                    // Smoothly interpolate rotation
+                    let rotationDiff = beeData.targetRotation - beeData.rotation;
+                    if (rotationDiff > 180) rotationDiff -= 360;
+                    if (rotationDiff < -180) rotationDiff += 360;
+                    beeData.rotation += rotationDiff * 0.15;
+                    if (beeData.rotation > 360) beeData.rotation -= 360;
+                    if (beeData.rotation < 0) beeData.rotation += 360;
+                    
+                    updateBeePosition(beeData);
+                }
+                
+                // Check every 30 frames if level is complete (bees might have moved into all empty tiles)
+                if (frameCount % 30 === 0) {
+                    checkLevelComplete();
+                }
+                
+                animationFrame = requestAnimationFrame(animate);
+            }
+            
+            animate();
+        }
+
+        function updateBeePosition(beeData) {
+            beeData.element.style.left = (beeData.position.x - 5) + 'px';
+            beeData.element.style.top = (beeData.position.y - 5) + 'px';
+            
+            const isMovingLeft = beeData.velocity.x < 0;
+            const scaleX = isMovingLeft ? 1 : -1;
+            const tiltAngle = Math.abs(beeData.rotation) > 45 ? (isMovingLeft ? -45 : 45) : beeData.rotation;
+            
+            beeData.element.style.transform = `scaleX(${scaleX}) rotate(${tiltAngle}deg)`;
+        }
+
+        function endGame(won) {
+            gameOver = true;
+            if (animationFrame) cancelAnimationFrame(animationFrame);
+            
+            if (won) {
+                // Add shine animation to all filled tiles
+                tiles.forEach((tile, index) => {
+                    if (filledTiles.has(index)) {
+                        // Stagger the animation slightly for wave effect
+                        setTimeout(() => {
+                            tile.classList.add('victory-shine');
+                        }, (index % gridSize) * 30);
+                    }
+                });
+                
+                // FORCE STOP all music immediately
+                forceStopAllAudio();
+                
+                // Wait for audio to be fully stopped before playing win sound
+                setTimeout(() => {
+                    playWinSound();
+                }, 150);
+                
+                // Get random encouraging message with its icon
+                const randomMessageObj = encouragingMessages[Math.floor(Math.random() * encouragingMessages.length)];
+                
+                // Show message with icon
+                showMessage(`${randomMessageObj.text} ${randomMessageObj.icon}`, 'win');
+                
+                // Check if we should show interstitial ad
+                if (shouldShowInterstitialAd(currentLevel)) {
+                    // Show ad after 2 seconds, then advance to next level
+                    setTimeout(() => {
+                        showInterstitialAd(() => {
+                            initGame(true);
+                        });
+                    }, 2000);
+                } else {
+                    // Auto-advance to next level after 2 seconds (no ad)
+                    setTimeout(() => {
+                        initGame(true);
+                    }, 2000);
+                }
+            } else {
+                // FORCE STOP music immediately when bee dies
+                forceStopAllAudio();
+                
+                // Vibrate device (shortest duration - 50ms)
+                if (navigator.vibrate) {
+                    navigator.vibrate(50);
+                }
+                
+                // Wait briefly before playing death sound
+                setTimeout(() => {
+                    playBeeDeathSound();
+                }, 100);
+                
+                // Lose a life
+                playerLives--;
+                updateStats();
+                
+                if (playerLives > 0) {
+                    // Player has lives remaining - retry level
+                    // Don't show message - just retry
+                    bees.forEach(beeData => beeData.element.classList.add('bee-dead'));
+                    
+                    // Auto-retry after 2 seconds
+                    setTimeout(() => {
+                        retryLevel();
+                        // Start music after level is set up
+                        setTimeout(() => {
+                            playBackgroundMusic();
+                        }, 100);
+                    }, 2000);
+                } else {
+                    // Game Over - no lives left, show continue option first
+                    // Don't show message - just show continue screen
+                    bees.forEach(beeData => beeData.element.classList.add('bee-dead'));
+                    
+                    // Show continue screen after a delay
+                    setTimeout(() => {
+                        continueScreen.style.display = 'flex';
+                    }, 1500);
+                }
+            }
+        }
+
+        function cycleDifficulty() {
+            const difficulties = Object.keys(DIFFICULTIES);
+            const currentIndex = difficulties.indexOf(currentDifficulty);
+            const nextIndex = (currentIndex + 1) % difficulties.length;
+            currentDifficulty = difficulties[nextIndex];
+            
+            // Update the display without starting the game
+            difficultyEl.textContent = currentDifficulty;
+            
+            // Update grid size and speed based on new difficulty
+            const baseGrid = DIFFICULTIES[currentDifficulty].grid;
+            const baseSpeed = DIFFICULTIES[currentDifficulty].speed;
+            gridSize = baseGrid + Math.floor((currentLevel - 1) / 3);
+            moveSpeed = baseSpeed * (1 + (currentLevel - 1) * 0.15);
+        }
+
+        function showGameOverScreen() {
+            // Check if new high score
+            const isNewHighScore = currentLevel > highestLevelEver;
+            if (isNewHighScore) {
+                highestLevelEver = currentLevel;
+                localStorage.setItem('beeGameHighestLevel', highestLevelEver);
+                updateBestScore(); // Update the display
+            }
+            
+            // Show game over screen
+            finalLevelEl.textContent = currentLevel;
+            highestLevelEl.textContent = highestLevelEver;
+            newHighScoreEl.style.display = isNewHighScore ? 'inline' : 'none';
+            continueScreen.style.display = 'none';
+            gameOverScreen.style.display = 'flex';
+        }
+
+        function shouldShowInterstitialAd(level) {
+            // Show between level 6 and 7 (completing level 6)
+            if (level === 6) return true;
+            
+            // Show every 2 levels after 8 (levels 8, 10, 12, 14, etc.)
+            if (level >= 8 && level % 2 === 0) return true;
+            
+            return false;
+        }
+
+        function showInterstitialAd(callback) {
+            // Show interstitial ad screen
+            interstitialAdScreen.style.display = 'flex';
+            
+            // Hide after 5 seconds and call callback
+            setTimeout(() => {
+                interstitialAdScreen.style.display = 'none';
+                if (callback) callback();
+            }, 5000);
+        }
+
+        // Generate a welcome pattern for the start screen
+        function drawWelcomePattern(canvas) {
+            const ctx = canvas.getContext('2d');
+
+            // Soft warm background gradient
+            const bg = ctx.createLinearGradient(0, 0, 800, 800);
+            bg.addColorStop(0, '#FFF9E6');
+            bg.addColorStop(0.5, '#FFF0C8');
+            bg.addColorStop(1, '#FFE4A0');
+            ctx.fillStyle = bg;
+            ctx.fillRect(0, 0, 800, 800);
+
+            // Mix of bee-game emojis for the preview
+            const emojis = ['🌸', '🐝', '🌻', '🍯', '🌼', '🐝', '🌺', '✨', '🌸', '🐝'];
+            const sizes = [90, 110, 130, 100, 120];
+            const positions = [];
+            let attempts = 0;
+
+            while (positions.length < 22 && attempts < 1200) {
+                attempts++;
+                const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+                const size = sizes[Math.floor(Math.random() * sizes.length)];
+                const x = Math.random() * (800 - size) + size / 2;
+                const y = Math.random() * (800 - size) + size / 2;
+                const radius = size / 2;
+
+                let overlaps = false;
+                for (let pos of positions) {
+                    const dx = x - pos.x;
+                    const dy = y - pos.y;
+                    if (Math.sqrt(dx * dx + dy * dy) < radius + pos.radius + 40) {
+                        overlaps = true;
+                        break;
+                    }
+                }
+
+                if (!overlaps) {
+                    positions.push({ x, y, radius });
+                    ctx.save();
+                    ctx.globalAlpha = 0.75 + Math.random() * 0.25;
+                    ctx.translate(x, y);
+                    ctx.rotate(Math.random() * Math.PI * 2);
+                    ctx.font = `${size}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(emoji, 0, 0);
+                    ctx.restore();
+                }
+            }
+        }
+
+        function isEmojiRendered(ctx, x, y, size) {
+            // Draw a test emoji and check if any non-transparent colored pixels exist
+            ctx.clearRect(x - size, y - size, size * 2, size * 2);
+            ctx.font = size + 'px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🐝', x, y);
+            const data = ctx.getImageData(x - size/2, y - size/2, size, size).data;
+            // Look for colored (non-grey, non-transparent) pixels indicating real emoji color rendering
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3];
+                if (a > 50 && !(r === g && g === b)) return true; // colored pixel = emoji loaded
+            }
+            return false;
+        }
+
+        function generateWelcomePattern() {
+            return new Promise((resolve) => {
+                const canvas = document.createElement('canvas');
+                canvas.width = 800;
+                canvas.height = 800;
+                // Must be visible in DOM for iOS to load the emoji color font
+                canvas.style.cssText = 'position:fixed;top:-9999px;left:-9999px;pointer-events:none;';
+                document.body.appendChild(canvas);
+                const ctx = canvas.getContext('2d');
+
+                let attempts = 0;
+                const maxAttempts = 30;
+
+                function tryDraw() {
+                    attempts++;
+                    if (isEmojiRendered(ctx, 400, 400, 60) || attempts >= maxAttempts) {
+                        // Emoji font is loaded — draw the full pattern
+                        drawWelcomePattern(canvas);
+                        const dataUrl = canvas.toDataURL();
+                        document.body.removeChild(canvas);
+                        resolve(dataUrl);
+                    } else {
+                        // Not ready yet — wait another frame and retry
+                        requestAnimationFrame(tryDraw);
+                    }
+                }
+
+                requestAnimationFrame(tryDraw);
+            });
+        }
+
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add pop + ripple animation to all non-header buttons on press
+            const gameButtons = [
+                document.getElementById('restartBtn'),
+                document.getElementById('difficultyBtn'),
+                document.getElementById('continueBtn'),
+                document.getElementById('giveUpBtn'),
+                document.getElementById('playAgainBtn'),
+                document.getElementById('shareBtn'),
+            ];
+            gameButtons.forEach(btn => {
+                if (!btn) return;
+                // Ensure button has position:relative for ripple positioning
+                btn.style.overflow = 'hidden';
+
+                function triggerPop(e) {
+                    // Pop animation
+                    btn.classList.remove('btn-pop');
+                    void btn.offsetWidth; // force reflow
+                    btn.classList.add('btn-pop');
+                    btn.addEventListener('animationend', () => btn.classList.remove('btn-pop'), { once: true });
+
+                    // Ripple effect
+                    const ripple = document.createElement('span');
+                    ripple.className = 'btn-ripple';
+                    const rect = btn.getBoundingClientRect();
+                    const x = (e.clientX || rect.left + rect.width / 2) - rect.left;
+                    const y = (e.clientY || rect.top + rect.height / 2) - rect.top;
+                    ripple.style.left = x + 'px';
+                    ripple.style.top = y + 'px';
+                    btn.appendChild(ripple);
+                    setTimeout(() => ripple.remove(), 700);
+                }
+
+                btn.addEventListener('mousedown', triggerPop);
+                btn.addEventListener('touchstart', (e) => triggerPop(e.touches[0]), { passive: true });
+            });
+
+            // Show welcome pattern on the game board before game starts
+            // generateWelcomePattern is async to fix iOS emoji rendering (must attach canvas to DOM first)
+            generateWelcomePattern().then((welcomePattern) => {
+                gameBoard.style.backgroundImage = `url(${welcomePattern})`;
+                gameBoard.style.backgroundSize = 'cover';
+                gameBoard.style.backgroundPosition = 'center';
+            });
+
+            restartBtn.addEventListener('click', () => {
+                // Restore original game board background when game starts
+                gameBoard.style.backgroundImage = '';
+                initGame(false);
+            });
+            difficultyBtn.addEventListener('click', cycleDifficulty);
+            
+            continueBtn.addEventListener('click', () => {
+                // Track continues on same level
+                if (lastFailedLevel === currentLevel) {
+                    continueCountOnLevel++;
+                } else {
+                    continueCountOnLevel = 1;
+                    lastFailedLevel = currentLevel;
+                }
+                
+                // Grant Queen Bee reward every time on 5th continue (resets each time)
+                if (continueCountOnLevel === 5) {
+                    queenBeeRewardActive = true;
+                    queenBeeUsed = false;
+                    continueCountOnLevel = 0; // Reset so they can earn it again
+                }
+                
+                // Hide buttons and show ad
+                continueButtons.style.display = 'none';
+                adContainer.style.display = 'block';
+                
+                // Show ad for 5 seconds
+                setTimeout(() => {
+                    // Hide continue screen
+                    continueScreen.style.display = 'none';
+                    adContainer.style.display = 'none';
+                    continueButtons.style.display = 'flex';
+                    
+                    // Restart at same level with 3 new lives
+                    playerLives = 3;
+                    retryLevel();
+                    
+                    // Show Queen Bee reward message if just granted
+                    if (queenBeeRewardActive && !queenBeeUsed) {
+                        setTimeout(() => {
+                            queenBeeRewardMessageEl.style.display = 'block';
+                            queenBeeRewardMessageEl.textContent = 'You got Queen Bee reward! Press 👑 to get help!';
+                            queenBeeBtn.style.display = 'inline-flex';
+                            
+                            // Add blink animation to button
+                            queenBeeBtn.classList.add('blink');
+                            
+                            // Play cute reward sound
+                            playQueenBeeRewardSound();
+                            
+                            setTimeout(() => {
+                                queenBeeRewardMessageEl.style.display = 'none';
+                                queenBeeRewardMessageEl.textContent = '';
+                                
+                                // Remove blink animation when message disappears
+                                queenBeeBtn.classList.remove('blink');
+                            }, 3000);
+                        }, 500);
+                    }
+                    
+                    // Start music after level setup
+                    setTimeout(() => {
+                        playBackgroundMusic();
+                    }, 100);
+                }, 5000);
+            });
+            
+            giveUpBtn.addEventListener('click', () => {
+                showGameOverScreen();
+            });
+            
+            queenBeeBtn.addEventListener('click', () => {
+                activateQueenBee();
+            });
+            
+            playAgainBtn.addEventListener('click', () => {
+                gameOverScreen.style.display = 'none';
+                initGame(false);
+            });
+            
+            shareBtn.addEventListener('click', async () => {
+                const shareText = `I reached level ${highestLevelEver} in Bit the Bee! 🐝 Can you beat my score?`;
+                const shareUrl = window.location.href;
+                
+                // Try native share API first (mobile)
+                if (navigator.share) {
+                    try {
+                        await navigator.share({
+                            title: 'Bit the Bee',
+                            text: shareText,
+                            url: shareUrl
+                        });
+                        console.log('Shared successfully');
+                    } catch (err) {
+                        if (err.name !== 'AbortError') {
+                            console.log('Share error:', err);
+                        }
+                    }
+                } else {
+                    // Fallback: copy to clipboard
+                    const fullText = `${shareText}\n${shareUrl}`;
+                    
+                    try {
+                        // Modern clipboard API
+                        await navigator.clipboard.writeText(fullText);
+                        alert('✅ Score copied to clipboard!\n\n' + fullText);
+                    } catch (err) {
+                        // Fallback for older browsers or file:// protocol
+                        const textArea = document.createElement('textarea');
+                        textArea.value = fullText;
+                        textArea.style.position = 'fixed';
+                        textArea.style.left = '-999999px';
+                        document.body.appendChild(textArea);
+                        textArea.focus();
+                        textArea.select();
+                        
+                        try {
+                            document.execCommand('copy');
+                            alert('✅ Score copied to clipboard!\n\n' + fullText);
+                        } catch (err2) {
+                            // Ultimate fallback: show the text
+                            alert('Share your score:\n\n' + fullText);
+                        }
+                        
+                        document.body.removeChild(textArea);
+                    }
+                }
+            });
+
+            // Handle window resize - update all bees
+            window.addEventListener('resize', () => {
+                if (bees && bees.length > 0) {
+                    bees.forEach(beeData => updateBeePosition(beeData));
+                }
+            });
+
+            // Add global listeners for touch and mouse events
+            gameBoard.addEventListener('touchmove', handleTileEnter, { passive: false });
+            gameBoard.addEventListener('touchend', handleTouchEnd);
+            gameBoard.addEventListener('touchcancel', handleTouchEnd);
+            document.addEventListener('mouseup', handleMouseUp);
+
+            // No welcome message - player can just start
+            
+            // Initialize stats display
+            updateStats();
+            updateBestScore();
+            
+            // Initialize sound toggle button
+            soundToggleBtn.innerHTML = soundMuted ? '<span style="position: relative; display: inline-block;">🎵<span style="position: absolute; top: 50%; left: 50%; width: 120%; height: 2px; background: red; transform: translate(-50%, -50%) rotate(-45deg);"></span></span>' : '🎵';
+            
+            // Sound toggle button event listener
+            soundToggleBtn.addEventListener('click', () => {
+                soundMuted = !soundMuted;
+                localStorage.setItem('soundMuted', soundMuted);
+                
+                // Update button icon
+                soundToggleBtn.innerHTML = soundMuted ? '<span style="position: relative; display: inline-block;">🎵<span style="position: absolute; top: 50%; left: 50%; width: 120%; height: 2px; background: red; transform: translate(-50%, -50%) rotate(-45deg);"></span></span>' : '🎵';
+                
+                if (soundMuted) {
+                    // Stop all sounds immediately
+                    forceStopAllAudio();
+                } else {
+                    // Restart music if game is active
+                    if (!gameOver && currentLevel > 0 && !musicPlaying) {
+                        playBackgroundMusic();
+                    }
+                }
+            });
+            
+            // Create bee favicon
+            const canvas = document.createElement('canvas');
+            canvas.width = 64;
+            canvas.height = 64;
+            const ctx = canvas.getContext('2d');
+            
+            // Draw bee emoji on canvas
+            ctx.font = '56px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🐝', 32, 32);
+            
+            // Convert to favicon
+            const link = document.querySelector("link[rel*='icon']") || document.createElement('link');
+            link.type = 'image/x-icon';
+            link.rel = 'shortcut icon';
+            link.href = canvas.toDataURL();
+            document.getElementsByTagName('head')[0].appendChild(link);
+        });
+    </script>
+</body>
+</html>
