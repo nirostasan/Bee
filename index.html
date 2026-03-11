@@ -321,12 +321,15 @@
             z-index: 2;
             touch-action: none;
             -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
             -webkit-user-drag: none;
             -khtml-user-drag: none;
             -moz-user-drag: none;
             -o-user-drag: none;
             user-select: none;
             -webkit-user-select: none;
+            outline: none;
+            -webkit-focus-ring-color: transparent;
         }
 
         .tile:hover {
@@ -726,18 +729,22 @@
 
         #message {
             text-align: center;
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 900;
             font-family: 'Zen Maru Gothic', 'Arial Rounded MT Bold', sans-serif;
-            height: 60px;
+            min-height: 60px;
             margin-top: 15px;
+            padding: 0 4px;
             visibility: hidden;
             white-space: normal;
             line-height: 1.4;
-            max-width: 100%;
+            width: 100%;
+            box-sizing: border-box;
             word-wrap: break-word;
+            overflow-wrap: break-word;
             position: relative;
             display: flex;
+            flex-wrap: wrap;
             align-items: center;
             justify-content: center;
         }
@@ -1601,12 +1608,18 @@
                 const tile = document.createElement('div');
                 tile.className = 'tile';
                 tile.dataset.index = i;
+                tile.setAttribute('tabindex', '-1');
                 tile.addEventListener('click', handleTileClick);
-                tile.addEventListener('touchstart', handleTileClick);
+                tile.addEventListener('touchstart', handleTileClick, { passive: false });
                 tile.addEventListener('mouseenter', handleTileEnter);
                 tile.addEventListener('mousedown', handleMouseDown);
                 inner.appendChild(tile);
                 tiles.push(tile);
+            }
+
+            // Blur any auto-focused element to prevent iOS tap highlight on first tile
+            if (document.activeElement && document.activeElement !== document.body) {
+                document.activeElement.blur();
             }
             
             // Create bees
@@ -1755,8 +1768,9 @@
                 const tile = document.createElement('div');
                 tile.className = 'tile';
                 tile.dataset.index = i;
+                tile.setAttribute('tabindex', '-1');
                 tile.addEventListener('click', handleTileClick);
-                tile.addEventListener('touchstart', handleTileClick);
+                tile.addEventListener('touchstart', handleTileClick, { passive: false });
                 tile.addEventListener('mouseenter', handleTileEnter);
                 tile.addEventListener('mousedown', handleMouseDown);
                 inner.appendChild(tile);
@@ -2941,10 +2955,7 @@
         }
 
         // Generate a welcome pattern for the start screen
-        function generateWelcomePattern() {
-            const canvas = document.createElement('canvas');
-            canvas.width = 800;
-            canvas.height = 800;
+        function drawWelcomePattern(canvas) {
             const ctx = canvas.getContext('2d');
 
             // Soft warm background gradient
@@ -2992,7 +3003,27 @@
                     ctx.restore();
                 }
             }
-            return canvas.toDataURL();
+        }
+
+        function generateWelcomePattern() {
+            return new Promise((resolve) => {
+                const canvas = document.createElement('canvas');
+                canvas.width = 800;
+                canvas.height = 800;
+                // Attach hidden to DOM so iOS loads the emoji color font
+                canvas.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;pointer-events:none;';
+                document.body.appendChild(canvas);
+
+                // Wait two frames so iOS has time to load the emoji font
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        drawWelcomePattern(canvas);
+                        const dataUrl = canvas.toDataURL();
+                        document.body.removeChild(canvas);
+                        resolve(dataUrl);
+                    });
+                });
+            });
         }
 
         // Wait for DOM to be fully loaded
@@ -3035,10 +3066,12 @@
             });
 
             // Show welcome pattern on the game board before game starts
-            const welcomePattern = generateWelcomePattern();
-            gameBoard.style.backgroundImage = `url(${welcomePattern})`;
-            gameBoard.style.backgroundSize = 'cover';
-            gameBoard.style.backgroundPosition = 'center';
+            // generateWelcomePattern is async to fix iOS emoji rendering (must attach canvas to DOM first)
+            generateWelcomePattern().then((welcomePattern) => {
+                gameBoard.style.backgroundImage = `url(${welcomePattern})`;
+                gameBoard.style.backgroundSize = 'cover';
+                gameBoard.style.backgroundPosition = 'center';
+            });
 
             restartBtn.addEventListener('click', () => {
                 // Restore original game board background when game starts
